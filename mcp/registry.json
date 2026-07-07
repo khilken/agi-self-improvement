@@ -1,0 +1,14 @@
+{
+  "memory_synthesizer": {
+    "capabilities": [
+      "memory_synthesis",
+      "consolidation",
+      "deduplication",
+      "importance_scoring",
+      "memory_health_reporting",
+      "reflection_generation"
+    ],
+    "last_seen": 1783310931.438921,
+    "metadata": {}
+  }
+}

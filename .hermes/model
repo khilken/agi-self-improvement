@@ -1,0 +1,6 @@
+# Hermes Project Model Preference
+default: claude-fable-5
+provider: anthropic
+fallback: ollama
+# When Anthropic key is available, use Claude Fable 5 for high-reasoning tasks
+# Fallback to local Ollama models when unavailable

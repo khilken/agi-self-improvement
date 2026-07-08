@@ -1,0 +1,2 @@
+INFO:Hermes.VectorMemory:VectorMemory initialized. Collection: hermes_knowledge | Embeddings: nomic-embed-text
+INFO:MemorySynthesizer:Starting MemorySynthesizer with shared task queue support

@@ -65,5 +65,5 @@ class ResearcherAgent(BaseMCPAgent):
 
 
 if __name__ == "__main__":
-    agent = ResearcherAgent()
-    agent.run()
+    logging.basicConfig(level=logging.INFO)
+    print("ResearcherAgent ready. Use HermesDispatcher to send tasks.")

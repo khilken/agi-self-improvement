@@ -8,7 +8,29 @@
       "memory_health_reporting",
       "reflection_generation"
     ],
-    "last_seen": 1783310931.438921,
+    "last_seen": 1783474049.9973462,
+    "metadata": {}
+  },
+  "researcher": {
+    "capabilities": [
+      "web_research",
+      "paper_reading",
+      "information_synthesis",
+      "trend_analysis",
+      "source_verification"
+    ],
+    "last_seen": 1783474069.741118,
+    "metadata": {}
+  },
+  "coder": {
+    "capabilities": [
+      "code_generation",
+      "refactoring",
+      "debugging",
+      "test_writing",
+      "architecture_review"
+    ],
+    "last_seen": 1783474071.639283,
     "metadata": {}
   }
 }

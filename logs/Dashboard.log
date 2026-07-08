@@ -1,0 +1,9 @@
+Traceback (most recent call last):
+  File "/Users/kevin/Library/CloudStorage/OneDrive-Personal/AI/Hermes/self/memory_dashboard/run_dashboard_server.py", line 44, in <module>
+    with socketserver.TCPServer(("", PORT), DashboardHTTPRequestHandler) as httpd:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/kevin/.local/share/uv/python/cpython-3.11.15-macos-aarch64-none/lib/python3.11/socketserver.py", line 456, in __init__
+    self.server_bind()
+  File "/Users/kevin/.local/share/uv/python/cpython-3.11.15-macos-aarch64-none/lib/python3.11/socketserver.py", line 472, in server_bind
+    self.socket.bind(self.server_address)
+OSError: [Errno 48] Address already in use

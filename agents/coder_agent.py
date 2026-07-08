@@ -65,5 +65,5 @@ class CoderAgent(BaseMCPAgent):
 
 
 if __name__ == "__main__":
-    agent = CoderAgent()
-    agent.run()
+    logging.basicConfig(level=logging.INFO)
+    print("CoderAgent ready. Use HermesDispatcher to send tasks.")

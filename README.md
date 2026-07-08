@@ -105,4 +105,51 @@ This project follows a **local-first, persistent, inspectable** approach:
 
 ---
 
+## Specialized Sub-Agents
+
+Hermes now includes multiple specialized agents that communicate via MCP:
+
+### Available Agents
+
+| Agent | File | Capabilities |
+|-------|------|--------------|
+| `memory_synthesizer` | `agents/memory_synthesizer.py` | Memory consolidation, clustering, importance scoring |
+| `researcher` | `agents/researcher_agent.py` | Web research, paper reading, information synthesis |
+| `coder` | `agents/coder_agent.py` | Code generation, refactoring, debugging, tests |
+
+### Using the Dispatcher
+
+```python
+from agents.dispatcher import HermesDispatcher
+
+d = HermesDispatcher()
+
+# Research task
+d.dispatch_research("Latest AGI self-improvement techniques 2026")
+
+# Coding task
+d.dispatch_coding("Create a FastAPI health check endpoint with logging")
+
+# Memory synthesis
+d.dispatch_memory_synthesis("full_synthesis")
+
+# Generic dispatch
+d.dispatch("researcher", "research", {"query": "OpenAI o3 capabilities"})
+```
+
+### Running Individual Agents
+
+```bash
+# Researcher
+PYTHONPATH=. python agents/researcher_agent.py
+
+# Coder
+PYTHONPATH=. python agents/coder_agent.py
+
+# MemorySynthesizer
+PYTHONPATH=. python agents/memory_synthesizer.py
+```
+
+---
+
 **This is your complete Hermes self-improving memory architecture.**

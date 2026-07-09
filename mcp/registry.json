@@ -8,7 +8,7 @@
       "memory_health_reporting",
       "reflection_generation"
     ],
-    "last_seen": 1783474049.9973462,
+    "last_seen": 1783570377.25046,
     "metadata": {}
   },
   "researcher": {
@@ -19,7 +19,7 @@
       "trend_analysis",
       "source_verification"
     ],
-    "last_seen": 1783474069.741118,
+    "last_seen": 1783570373.8051589,
     "metadata": {}
   },
   "coder": {
@@ -30,7 +30,36 @@
       "test_writing",
       "architecture_review"
     ],
-    "last_seen": 1783474071.639283,
+    "last_seen": 1783570373.806717,
+    "metadata": {}
+  },
+  "orchestrator": {
+    "capabilities": [
+      "workflow_orchestration",
+      "reflection_loop",
+      "multi_agent_coordination"
+    ],
+    "last_seen": 1783570331.950546,
+    "metadata": {}
+  },
+  "meta_improver": {
+    "capabilities": [
+      "trace_analysis",
+      "failure_pattern_detection",
+      "improvement_proposal",
+      "prompt_optimization"
+    ],
+    "last_seen": 1783570373.805959,
+    "metadata": {}
+  },
+  "evaluator": {
+    "capabilities": [
+      "output_evaluation",
+      "quality_scoring",
+      "feedback_generation",
+      "reflection"
+    ],
+    "last_seen": 1783570373.966489,
     "metadata": {}
   }
 }

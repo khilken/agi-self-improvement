@@ -62,8 +62,8 @@ class CoderAgent(BaseMCPAgent):
 
         if TASK_QUEUE_AVAILABLE:
             complete_task(msg.payload.get("task_id"))
-
-
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    print("CoderAgent ready. Use HermesDispatcher to send tasks.")
+    agent = CoderAgent()
+    from agents.base_runner import run_agent
+    run_agent(agent)

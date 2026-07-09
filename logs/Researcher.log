@@ -1,0 +1,7 @@
+INFO:AgentRunner:ResearcherAgent starting message loop...
+INFO:ResearcherAgent:Researcher received task: research | query=Test query
+INFO:ResearcherAgent:Researcher received task: research | query=Debug test
+INFO:ResearcherAgent:Researcher received task: test | query=
+INFO:ResearcherAgent:Researcher received task: research | query=Debug test with logging
+INFO:ResearcherAgent:Researcher received task: research | query=Final test
+INFO:ResearcherAgent:Researcher received task: research | query=End-to-end test

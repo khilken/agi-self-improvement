@@ -21,6 +21,7 @@ class HermesDispatcher:
             "researcher": "researcher",
             "coder": "coder",
             "memory_synthesizer": "memory_synthesizer",
+            "orchestrator": "orchestrator",
             "evaluator": "evaluator",
             "meta_improver": "meta_improver",
         }
@@ -53,9 +54,9 @@ class HermesDispatcher:
 
         logger.info(f"Dispatching {task_type} to {target_agent} (trace={trace_id})")
 
-        self.mcp.send_message(
-            to=target_agent,
-            message_type=MessageType.TASK_REQUEST,
+        self.mcp.send(
+            to_agent=target_agent,
+            msg_type=MessageType.TASK_REQUEST,
             payload=payload,
             correlation_id=correlation_id,
         )

@@ -1,0 +1,18 @@
+{
+  "message_id": "47fb4ddf-65d7-4417-9ca6-1eeb7acbb18c",
+  "correlation_id": null,
+  "from_agent": "researcher",
+  "to_agent": "hermes_dispatcher",
+  "message_type": "task_result",
+  "payload": {
+    "status": "completed",
+    "task_type": "research",
+    "query": "Debug test with logging",
+    "summary": "Research completed for: Debug test with logging",
+    "sources": []
+  },
+  "timestamp": 1783571001.071758,
+  "priority": 5,
+  "ttl_seconds": null,
+  "tags": []
+}

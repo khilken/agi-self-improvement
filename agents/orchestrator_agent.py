@@ -48,8 +48,8 @@ class OrchestratorAgent(BaseMCPAgent):
             payload=result,
             correlation_id=msg.correlation_id
         )
-
-
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    print("OrchestratorAgent ready.")
+    agent = OrchestratorAgent()
+    from agents.base_runner import run_agent
+    run_agent(agent)

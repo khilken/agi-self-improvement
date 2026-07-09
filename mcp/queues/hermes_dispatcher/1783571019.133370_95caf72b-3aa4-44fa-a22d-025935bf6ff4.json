@@ -1,0 +1,18 @@
+{
+  "message_id": "95caf72b-3aa4-44fa-a22d-025935bf6ff4",
+  "correlation_id": null,
+  "from_agent": "researcher",
+  "to_agent": "hermes_dispatcher",
+  "message_type": "task_result",
+  "payload": {
+    "status": "completed",
+    "task_type": "research",
+    "query": "End-to-end test",
+    "summary": "Research completed for: End-to-end test",
+    "sources": []
+  },
+  "timestamp": 1783571019.1333702,
+  "priority": 5,
+  "ttl_seconds": null,
+  "tags": []
+}

@@ -1,8 +1,8 @@
 """
-Meta-Improver Agent for Hermes
-==============================
+Meta-Improver Agent for Hermes (Enhanced)
+=========================================
 
-Analyzes task traces and persists improvement proposals.
+Analyzes traces and generates concrete, actionable improvement proposals.
 """
 
 import json
@@ -63,17 +63,25 @@ class MetaImproverAgent(BaseMCPAgent):
                 patterns[t.evaluation_feedback] += 1
 
         proposals = []
+
         if len(low_score) > 5:
             proposals.append({
-                "type": "add_reflection",
-                "description": "Add Evaluator step before final delivery",
-                "priority": "high"
+                "id": f"proposal_{datetime.now().strftime('%Y%m%d%H%M%S')}",
+                "type": "add_reflection_step",
+                "title": "Add Evaluator before final delivery",
+                "description": "Route all significant outputs through the EvaluatorAgent for scoring and feedback.",
+                "priority": "high",
+                "estimated_impact": "Significant quality improvement"
             })
+
         if len(errors) > 3:
             proposals.append({
-                "type": "improve_error_handling",
-                "description": "Strengthen error handling in agents",
-                "priority": "medium"
+                "id": f"proposal_{datetime.now().strftime('%Y%m%d%H%M%S')}_2",
+                "type": "error_handling",
+                "title": "Improve error handling across agents",
+                "description": "Add better try/except blocks and fallback logic in Researcher and Coder agents.",
+                "priority": "medium",
+                "estimated_impact": "Reduced failure rate"
             })
 
         # Persist proposals
@@ -97,8 +105,8 @@ class MetaImproverAgent(BaseMCPAgent):
             "proposals": proposals,
             "saved_to": str(self.proposals_dir)
         }
-
-
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    print("MetaImproverAgent ready.")
+    agent = MetaImproverAgent()
+    from agents.base_runner import run_agent
+    run_agent(agent)

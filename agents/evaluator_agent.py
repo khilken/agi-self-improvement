@@ -1,8 +1,8 @@
 """
-Evaluator Agent for Hermes (with Ollama support)
-================================================
+Evaluator Agent for Hermes (Production LLM Version)
+===================================================
 
-Evaluates outputs using a local LLM (Ollama) for scoring and feedback.
+Uses Ollama for high-quality output evaluation and reflection.
 """
 
 import logging
@@ -28,12 +28,7 @@ class EvaluatorAgent(BaseMCPAgent):
         self.mcp.register_handler(MessageType.TASK_REQUEST, self.handle_task_request)
 
     def get_capabilities(self) -> List[str]:
-        return [
-            "output_evaluation",
-            "quality_scoring",
-            "feedback_generation",
-            "reflection"
-        ]
+        return ["output_evaluation", "quality_scoring", "feedback_generation", "reflection"]
 
     def handle_task_request(self, msg: MCPMessage):
         context = msg.payload.get("context", {})
@@ -62,17 +57,24 @@ class EvaluatorAgent(BaseMCPAgent):
 
     def _evaluate_with_llm(self, output: Dict, task: Dict) -> Tuple[float, str]:
         if not OLLAMA_AVAILABLE:
-            return 0.6, "Ollama not available - using default score."
+            return 0.6, "Ollama not available."
 
-        prompt = f"""You are an expert evaluator.
+        prompt = f"""You are a strict but fair evaluator of AI agent outputs.
 
-Task: {json.dumps(task, indent=2)}
+TASK DESCRIPTION:
+{json.dumps(task, indent=2)}
 
-Output to evaluate: {json.dumps(output, indent=2)}
+AGENT OUTPUT:
+{json.dumps(output, indent=2)}
 
-Rate the output from 0.0 to 1.0 on quality, completeness, and correctness.
+Evaluate the output on:
+- Correctness (does it solve the task?)
+- Completeness
+- Clarity and structure
+- Actionability
+
 Respond ONLY with valid JSON:
-{{"score": 0.85, "feedback": "Short explanation"}}"""
+{{"score": 0.0-1.0, "feedback": "One or two sentences explaining the score"}}"""
 
         try:
             response = ollama.chat(
@@ -81,18 +83,22 @@ Respond ONLY with valid JSON:
                 format="json"
             )
             data = json.loads(response['message']['content'])
-            return float(data.get("score", 0.6)), data.get("feedback", "No feedback.")
+            score = max(0.0, min(1.0, float(data.get("score", 0.6))))
+            feedback = data.get("feedback", "No feedback provided.")
+            return score, feedback
         except Exception as e:
             logger.error(f"LLM evaluation failed: {e}")
             return 0.5, f"Evaluation error: {str(e)}"
 
     def _generate_suggestions(self, score: float, feedback: str) -> List[str]:
         suggestions = []
-        if score < 0.6:
-            suggestions.append("Increase detail, structure, or accuracy.")
+        if score < 0.5:
+            suggestions.append("Significantly improve detail, structure, or accuracy.")
+        elif score < 0.7:
+            suggestions.append("Add more depth or better formatting.")
         return suggestions
-
-
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    print("EvaluatorAgent (LLM) ready.")
+    agent = EvaluatorAgent()
+    from agents.base_runner import run_agent
+    run_agent(agent)

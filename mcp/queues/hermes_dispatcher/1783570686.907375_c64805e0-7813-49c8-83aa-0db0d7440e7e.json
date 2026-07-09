@@ -1,0 +1,18 @@
+{
+  "message_id": "c64805e0-7813-49c8-83aa-0db0d7440e7e",
+  "correlation_id": null,
+  "from_agent": "researcher",
+  "to_agent": "hermes_dispatcher",
+  "message_type": "task_result",
+  "payload": {
+    "status": "completed",
+    "task_type": "test",
+    "query": "",
+    "summary": "Research completed for: ",
+    "sources": []
+  },
+  "timestamp": 1783570686.907375,
+  "priority": 5,
+  "ttl_seconds": null,
+  "tags": []
+}

@@ -1,9 +1,8 @@
 #!/bin/bash
-# Stop Hermes Full Stack (Production Ready)
+# Stop all Hermes processes
 
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PID_FILE="$PROJECT_DIR/.hermes_pids"
-LOG_DIR="$PROJECT_DIR/logs"
 
 echo "🛑 Stopping Hermes stack..."
 
@@ -16,10 +15,14 @@ if [ -f "$PID_FILE" ]; then
     done < "$PID_FILE"
     rm -f "$PID_FILE"
 else
-    echo "No PID file found. Killing by process name..."
+    echo "Killing by process name..."
     pkill -f "run_dashboard_server.py" || true
     pkill -f "memory_synthesizer.py" || true
+    pkill -f "researcher_agent.py" || true
+    pkill -f "coder_agent.py" || true
+    pkill -f "evaluator_agent.py" || true
+    pkill -f "meta_improver_agent.py" || true
+    pkill -f "orchestrator_agent.py" || true
 fi
 
 echo "✅ Hermes stack stopped."
-echo "Logs preserved in: $LOG_DIR"

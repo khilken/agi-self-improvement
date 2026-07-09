@@ -197,6 +197,12 @@ class MCPProtocol:
         self.transport.send(msg)
         return msg
 
+    # Convenience alias used by Dispatcher
+    def send_message(self, to: str, message_type: MessageType, payload: Dict[str, Any],
+                     correlation_id: Optional[str] = None) -> MCPMessage:
+        return self.send(to_agent=to, msg_type=message_type, payload=payload,
+                         correlation_id=correlation_id)
+
     def receive(self) -> List[MCPMessage]:
         return self.transport.receive(self.agent_name)
 

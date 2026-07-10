@@ -17,6 +17,7 @@ from collections import defaultdict
 from mcp.protocol import BaseMCPAgent, MessageType, MCPMessage
 from tracing.task_trace import tracer
 from tracing.proposal import ImprovementProposal, ProposalType, RiskLevel, ProposalStore
+from tracing.approval import ApprovalGate, ApprovalStatus
 
 logger = logging.getLogger("MetaImproverAgent")
 
@@ -25,6 +26,7 @@ class MetaImproverAgent(BaseMCPAgent):
     def __init__(self, name: str = "meta_improver"):
         super().__init__(name=name)
         self.proposal_store = ProposalStore()
+        self.approval_gate = ApprovalGate()
         self.mcp.register_handler(MessageType.TASK_REQUEST, self.handle_task_request)
 
     def get_capabilities(self) -> List[str]:
@@ -79,6 +81,8 @@ class MetaImproverAgent(BaseMCPAgent):
                 priority="high"
             )
             self.proposal_store.save(proposal)
+            if proposal.risk_level in [RiskLevel.MEDIUM, RiskLevel.HIGH]:
+                self.approval_gate.submit_for_approval(proposal.id)
             proposals.append(proposal)
 
         # Code improvement proposal
@@ -95,6 +99,8 @@ class MetaImproverAgent(BaseMCPAgent):
                 priority="medium"
             )
             self.proposal_store.save(proposal)
+            if proposal.risk_level in [RiskLevel.MEDIUM, RiskLevel.HIGH]:
+                self.approval_gate.submit_for_approval(proposal.id)
             proposals.append(proposal)
 
         return {

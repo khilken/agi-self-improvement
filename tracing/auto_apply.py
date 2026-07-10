@@ -47,6 +47,11 @@ class AutoApplyEngine:
             if approval and approval.status != "pending":
                 continue
 
+            # Self-verification before auto-apply
+            if not self._verify_proposal(proposal):
+                logger.warning(f"Proposal {proposal.id} failed verification - skipping")
+                continue
+
             # Auto-apply
             try:
                 self._apply_proposal(proposal)

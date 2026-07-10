@@ -7,6 +7,8 @@ information synthesis, and knowledge acquisition.
 """
 
 import logging
+import ollama
+import json
 from typing import List
 
 from mcp.protocol import BaseMCPAgent, MessageType, MCPMessage
@@ -37,7 +39,16 @@ class ResearcherAgent(BaseMCPAgent):
             "source_verification"
         ]
 
+    def _call_llm(self, prompt: str, model: str = "qwen2.5:32b"):
+        try:
+            response = ollama.chat(model=model, messages=[{"role": "user", "content": prompt}])
+            return response["message"]["content"]
+        except Exception as e:
+            logger.error(f"LLM call failed: {e}")
+            return None
+
     def handle_task_request(self, msg: MCPMessage):
+        print(f"[DEBUG] {self.__class__.__name__} received: {msg.message_type} from {msg.from_agent}")
         task_type = msg.payload.get("task_type", "research")
         context = msg.payload.get("context", {})
         query = context.get("query", "")

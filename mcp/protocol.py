@@ -99,13 +99,23 @@ class FileTransport:
     This makes everything auditable, version-controllable, and survives restarts.
     """
 
+    _instance = None
+
+    def __new__(cls, base_path=None):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+        return cls._instance
+
     def __init__(self, base_path: Path = None):
+        if hasattr(self, "_initialized") and self._initialized:
+            return
         if base_path is None:
             import os
-            base_path = Path(os.getcwd()) / "mcp" / "queues"
+            base_path = Path.home() / ".hermes" / "mcp_queues"
         self.base_path = Path(base_path).resolve()
         self.base_path.mkdir(parents=True, exist_ok=True)
         self._lock = threading.Lock()
+        self._initialized = True
 
     def _get_queue_dir(self, agent: str) -> Path:
         qdir = self.base_path / agent

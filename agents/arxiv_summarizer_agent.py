@@ -6,6 +6,8 @@ Specialized agent for fetching, summarizing, and extracting insights from arXiv 
 """
 
 import logging
+import ollama
+import json
 from typing import List
 
 from mcp.protocol import BaseMCPAgent, MessageType, MCPMessage
@@ -25,6 +27,14 @@ class ArxivSummarizerAgent(BaseMCPAgent):
             "insight_extraction",
             "trend_analysis"
         ]
+
+    def _call_llm(self, prompt: str, model: str = "qwen2.5:32b"):
+        try:
+            response = ollama.chat(model=model, messages=[{"role": "user", "content": prompt}])
+            return response["message"]["content"]
+        except Exception as e:
+            logger.error(f"LLM call failed: {e}")
+            return None
 
     def handle_task_request(self, msg: MCPMessage):
         context = msg.payload.get("context", {})

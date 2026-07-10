@@ -77,7 +77,7 @@ class HermesDispatcher:
     def dispatch_meta_analysis(self):
         return self.dispatch("meta_improver", "analyze_traces", {})
 
-        def run_with_reflection(self, target_agent: str, task_type: str, context: Dict):
+    def run_with_reflection(self, target_agent: str, task_type: str, context: Dict):
             """
             Executes a task with automatic reflection:
             1. Dispatch to target agent

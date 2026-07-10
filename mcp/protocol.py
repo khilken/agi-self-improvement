@@ -99,8 +99,11 @@ class FileTransport:
     This makes everything auditable, version-controllable, and survives restarts.
     """
 
-    def __init__(self, base_path: Path = Path("mcp/queues")):
-        self.base_path = base_path
+    def __init__(self, base_path: Path = None):
+        if base_path is None:
+            import os
+            base_path = Path(os.getcwd()) / "mcp" / "queues"
+        self.base_path = Path(base_path).resolve()
         self.base_path.mkdir(parents=True, exist_ok=True)
         self._lock = threading.Lock()
 
@@ -120,6 +123,7 @@ class FileTransport:
             return str(filepath)
 
     def receive(self, agent: str, delete_after_read: bool = True) -> List[MCPMessage]:
+        print(f"[TRANSPORT] receive called for {agent}")
         """Read all pending messages for an agent (oldest first)."""
         qdir = self._get_queue_dir(agent)
         messages: List[MCPMessage] = []

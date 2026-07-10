@@ -20,6 +20,9 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from tracing.task_trace import tracer
 from agents.meta_improver_agent import MetaImproverAgent
 from agents.hyper_meta_improver_agent import HyperMetaImproverAgent
+from agents.knowledge_curator_agent import KnowledgeCuratorAgent
+from agents.safety_governance_agent import SafetyGovernanceAgent
+from agents.long_horizon_planner_agent import LongHorizonPlannerAgent
 from tracing.auto_apply import AutoApplyEngine
 from tracing.approval import ApprovalGate
 from tracing.history import ImprovementHistory, HistoryEvent, HistoryEventType

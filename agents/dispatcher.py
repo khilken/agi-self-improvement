@@ -77,18 +77,25 @@ class HermesDispatcher:
     def dispatch_meta_analysis(self):
         return self.dispatch("meta_improver", "analyze_traces", {})
 
-    def run_with_reflection(self, target_agent: str, task_type: str, context: Dict):
-        """
-        Executes a task with automatic reflection:
-        1. Dispatch to target agent
-        2. Send result to Evaluator
-        3. Return final score + feedback
-        """
-        trace_id = self.dispatch(target_agent, task_type, context)
+        def run_with_reflection(self, target_agent: str, task_type: str, context: Dict):
+            """
+            Executes a task with automatic reflection:
+            1. Dispatch to target agent
+            2. Automatically dispatch evaluation request to Evaluator
+            3. Return trace_id for tracking
+            """
+            trace_id = self.dispatch(target_agent, task_type, context)
 
-        # In a real system this would be async.
-        # For now we return the trace_id so the caller can follow up.
-        return {
-            "trace_id": trace_id,
-            "message": "Task dispatched with reflection enabled. Check trace for evaluation."
-        }
+            # Automatically dispatch to Evaluator with the trace_id
+            eval_context = {
+                "original_task": context,
+                "trace_id": trace_id
+            }
+            self.dispatch("evaluator", "evaluate", eval_context)
+
+            logger.info(f"Reflection loop initiated for trace {trace_id}")
+
+            return {
+                "trace_id": trace_id,
+                "message": "Task + Evaluation dispatched. Reflection loop active."
+            }

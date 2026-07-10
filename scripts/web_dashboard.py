@@ -73,6 +73,11 @@ def dashboard():
     proposals = {p.id: p for p in proposal_store.list_all()}
     return render_template_string(HTML_TEMPLATE, pending=pending, proposals=proposals)
 
+@app.route("/proposals")
+def all_proposals():
+    all_props = proposal_store.list_all()
+    return "<br>".join([f"{p.id[:8]} - {p.title} [{p.risk_level}]" for p in all_props])
+
 
 @app.route("/action", methods=["POST"])
 def action():

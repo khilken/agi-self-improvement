@@ -10,6 +10,7 @@ from typing import Any, Dict, Optional
 
 from mcp.protocol import MCPProtocol, MessageType
 from tracing.task_trace import tracer
+from tracing.model_preference import ModelPreference
 
 logger = logging.getLogger("Dispatcher")
 
@@ -17,6 +18,7 @@ logger = logging.getLogger("Dispatcher")
 class HermesDispatcher:
     def __init__(self, agent_name: str = "hermes_dispatcher"):
         self.mcp = MCPProtocol(agent_name=agent_name)
+        self.model_pref = ModelPreference()
         self.agents = {
             "researcher": "researcher",
             "coder": "coder",

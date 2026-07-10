@@ -1,0 +1,18 @@
+{
+  "message_id": "4e13c9ec-9cc2-4294-8d72-42e473533ebd",
+  "correlation_id": null,
+  "from_agent": "hermes_dispatcher",
+  "to_agent": "researcher",
+  "message_type": "task_request",
+  "payload": {
+    "task_type": "research",
+    "context": {
+      "query": "Final test",
+      "trace_id": "0f7cc6f8-6882-4a6e-845d-3696de5a2020"
+    }
+  },
+  "timestamp": 1783642535.6168451,
+  "priority": 5,
+  "ttl_seconds": null,
+  "tags": []
+}

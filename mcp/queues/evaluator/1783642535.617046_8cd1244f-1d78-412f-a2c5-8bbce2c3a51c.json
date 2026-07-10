@@ -1,0 +1,21 @@
+{
+  "message_id": "8cd1244f-1d78-412f-a2c5-8bbce2c3a51c",
+  "correlation_id": null,
+  "from_agent": "hermes_dispatcher",
+  "to_agent": "evaluator",
+  "message_type": "task_request",
+  "payload": {
+    "task_type": "evaluate",
+    "context": {
+      "original_task": {
+        "query": "Final test",
+        "trace_id": "0f7cc6f8-6882-4a6e-845d-3696de5a2020"
+      },
+      "trace_id": "e23029fc-5f08-49ce-af41-c13b8a02f568"
+    }
+  },
+  "timestamp": 1783642535.617046,
+  "priority": 5,
+  "ttl_seconds": null,
+  "tags": []
+}

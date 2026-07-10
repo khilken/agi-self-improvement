@@ -31,6 +31,7 @@ class EvaluatorAgent(BaseMCPAgent):
         return ["output_evaluation", "quality_scoring", "feedback_generation", "reflection"]
 
     def handle_task_request(self, msg: MCPMessage):
+        print(f"[DEBUG] {self.__class__.__name__} received: {msg.message_type} from {msg.from_agent}")
         context = msg.payload.get("context", {})
         original_output = context.get("output", {})
         original_task = context.get("original_task", {})

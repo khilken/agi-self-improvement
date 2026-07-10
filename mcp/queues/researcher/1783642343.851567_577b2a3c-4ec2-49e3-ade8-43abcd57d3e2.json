@@ -1,0 +1,18 @@
+{
+  "message_id": "577b2a3c-4ec2-49e3-ade8-43abcd57d3e2",
+  "correlation_id": null,
+  "from_agent": "hermes_dispatcher",
+  "to_agent": "researcher",
+  "message_type": "task_request",
+  "payload": {
+    "task_type": "research",
+    "context": {
+      "query": "Transport test",
+      "trace_id": "d613595f-8977-4726-b66a-beae64f23c5f"
+    }
+  },
+  "timestamp": 1783642343.851567,
+  "priority": 5,
+  "ttl_seconds": null,
+  "tags": []
+}

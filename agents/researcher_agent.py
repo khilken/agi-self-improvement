@@ -48,7 +48,6 @@ class ResearcherAgent(BaseMCPAgent):
             return None
 
     def handle_task_request(self, msg: MCPMessage):
-        print(f"[DEBUG] {self.__class__.__name__} received: {msg.message_type} from {msg.from_agent}")
         task_type = msg.payload.get("task_type", "research")
         context = msg.payload.get("context", {})
         query = context.get("query", "")

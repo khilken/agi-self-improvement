@@ -133,7 +133,6 @@ class FileTransport:
             return str(filepath)
 
     def receive(self, agent: str, delete_after_read: bool = True) -> List[MCPMessage]:
-        print(f"[TRANSPORT] receive called for {agent}")
         """Read all pending messages for an agent (oldest first)."""
         qdir = self._get_queue_dir(agent)
         messages: List[MCPMessage] = []

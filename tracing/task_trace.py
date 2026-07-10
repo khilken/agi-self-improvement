@@ -60,6 +60,8 @@ class TaskTracer:
             metadata=metadata or {},
         )
         self.current_traces[trace_id] = trace
+        # Persist immediately for better observability
+        self._save_trace(trace)
         return trace_id
 
     def end_trace(

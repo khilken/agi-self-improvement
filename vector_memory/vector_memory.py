@@ -17,7 +17,9 @@ Location: memory/vector_db/ (persistent)
 """
 
 from __future__ import annotations
+import hashlib
 import json
+import math
 import time
 import uuid
 from dataclasses import dataclass, field
@@ -106,25 +108,42 @@ class VectorMemory:
     # -------------------------------------------------------------------------
 
     def _get_embedding(self, text: str) -> List[float]:
-        """Generate embedding using Ollama (preferred) or fallback."""
+        """Generate embedding using Ollama, with deterministic lexical fallback.
+
+        The fallback is intentionally deterministic so retrieval remains stable
+        across runs even when Ollama is temporarily unavailable.
+        """
         if OLLAMA_AVAILABLE:
             try:
                 response = ollama.embeddings(
                     model=self.embedding_model,
                     prompt=text,
-                    options={"num_ctx": 8192}  # Good context for embeddings
+                    options={"num_ctx": 8192}
                 )
                 return response["embedding"]
             except Exception as e:
-                logger.error(f"Ollama embedding failed: {e}. Falling back to random (not recommended).")
-                # In production you would raise or use a local sentence-transformers model
-                import random
-                return [random.random() for _ in range(768)]
+                logger.error("Ollama embedding failed: %s. Using deterministic fallback embedding.", e)
 
-        # Fallback (should be avoided in real use)
-        import random
-        logger.warning("Using random embeddings - install ollama + pull embedding model")
-        return [random.random() for _ in range(768)]
+        logger.warning("Using deterministic hash embeddings; install/configure ollama for semantic quality")
+        return self._deterministic_embedding(text)
+
+    def _deterministic_embedding(self, text: str, dimensions: int = 768) -> List[float]:
+        """Return a stable hashed bag-of-words embedding.
+
+        This is not as semantically rich as a model embedding, but it avoids the
+        severe bug of random vectors changing every process/query.
+        """
+        vector = [0.0] * dimensions
+        tokens = [tok for tok in text.lower().replace("_", " ").split() if tok]
+        if not tokens:
+            tokens = [text]
+        for token in tokens:
+            digest = hashlib.sha256(token.encode("utf-8", errors="ignore")).digest()
+            idx = int.from_bytes(digest[:4], "big") % dimensions
+            sign = 1.0 if digest[4] % 2 == 0 else -1.0
+            vector[idx] += sign
+        norm = math.sqrt(sum(v * v for v in vector)) or 1.0
+        return [v / norm for v in vector]
 
     # -------------------------------------------------------------------------
     # Core Operations

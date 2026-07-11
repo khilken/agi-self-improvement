@@ -1,66 +1,74 @@
 """
 Example Sub-Agent: Researcher
-Demonstrates how to build a specialized agent that speaks MCP and works under Hermes.
+=============================
 
-This agent could be expanded with real web_search, browse_page, and LLM summarization tools.
+Minimal MCP researcher example that produces evidence-based local summaries.
+It avoids fabricated sources/results; callers can pass sources/snippets in the
+message context and the agent will synthesize from only that provided evidence.
 """
 
+from __future__ import annotations
+
 import logging
+from typing import Any
+
 from mcp.protocol import BaseMCPAgent, MessageType
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("ResearcherAgent")
+logger = logging.getLogger("ExampleResearcherAgent")
 
 
 class ResearcherAgent(BaseMCPAgent):
     def get_capabilities(self):
         return [
-            "web_research",
-            "paper_summarization",
-            "trend_analysis",
-            "source_evaluation"
+            "evidence_synthesis",
+            "source_evaluation",
+            "research_planning",
         ]
 
     def handle_task_request(self, msg: "MCPMessage"):
-        task = msg.payload.get("task", "")
-        context = msg.payload.get("context", {})
+        task = msg.payload.get("task") or msg.payload.get("task_type", "research")
+        context: dict[str, Any] = msg.payload.get("context", {}) or {}
+        sources = context.get("sources", []) or []
+        notes = context.get("notes") or context.get("snippets") or []
+        if isinstance(notes, str):
+            notes = [notes]
 
-        logger.info(f"Received research task: {task}")
+        logger.info("Received research task: %s", task)
 
-        # TODO: In real implementation, use tools here:
-        # - web_search / browse_page
-        # - Call local LLM (Ollama) for summarization
-        # - Synthesize findings
+        summary_parts = []
+        if notes:
+            summary_parts.append("Provided evidence:\n" + "\n".join(f"- {str(n)[:300]}" for n in notes[:8]))
+        else:
+            summary_parts.append("No source snippets were provided, so this example agent cannot claim factual findings.")
 
-        fake_result = {
+        result = {
             "task": task,
-            "summary": f"Research summary for: {task}. Key findings: ... (placeholder)",
-            "sources": ["https://arxiv.org/example1", "https://github.com/example"],
-            "confidence": 0.85,
+            "summary": "\n".join(summary_parts),
+            "sources": [str(src) for src in sources],
+            "confidence": 0.75 if notes else 0.2,
             "next_suggested_actions": [
-                "Deep dive into paper X",
-                "Compare with previous research on Y"
-            ]
+                "Provide URLs/snippets or delegate to a real web-search-capable agent.",
+                "Ask EvaluatorAgent to score the resulting evidence quality.",
+            ],
+            "fabricated": False,
         }
 
-        # Report back using correlation_id so Hermes can match the result
         self.mcp.report_result(
             to_agent=msg.from_agent,
             correlation_id=msg.correlation_id,
-            result=fake_result,
-            success=True
+            result=result,
+            success=True,
         )
 
-        # Optionally propose a self-improvement
-        if "self_improving" in task.lower():
+        if "self_improving" in str(task).lower():
             self.mcp.propose_self_improvement(
-                proposal="Add native arXiv + Hugging Face paper ingestion tool to Researcher agent",
-                rationale="Would significantly speed up self-improvement research loops",
-                expected_impact="Higher quality and faster capability gap analysis"
+                proposal="Connect example researcher to a real web/search tool adapter",
+                rationale="The example agent currently only synthesizes provided evidence, by design.",
+                expected_impact="Higher quality research while preserving no-fabrication behavior",
             )
 
     def run(self):
-        # Override to add custom handler registration if needed
         self.mcp.register_handler(MessageType.TASK_REQUEST, self.handle_task_request)
         super().run_loop()
 
@@ -68,5 +76,5 @@ class ResearcherAgent(BaseMCPAgent):
 if __name__ == "__main__":
     agent = ResearcherAgent(name="researcher")
     print("Starting example Researcher sub-agent...")
-    print("It will listen for TASK_REQUEST messages via MCP.")
+    print("It listens for TASK_REQUEST messages via MCP and only summarizes provided evidence.")
     agent.run()

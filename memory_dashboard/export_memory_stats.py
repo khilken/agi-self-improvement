@@ -98,6 +98,8 @@ def export_memory_health(output_path: str = "memory_dashboard/memory_health.json
             }
             break
 
+    growth_trend = _calculate_growth_trend(total_entries, output_path)
+
     health_data = {
         "generated_at": datetime.now().isoformat(),
         "generated_at_unix": time.time(),
@@ -108,7 +110,7 @@ def export_memory_health(output_path: str = "memory_dashboard/memory_health.json
         "cluster_stats": cluster_stats,
         "recent_syntheses": recent_syntheses,
         "last_synthesis_run": last_synthesis,
-        "memory_growth_trend": "stable",  # Placeholder for future time-series
+        "memory_growth_trend": growth_trend,
         "health_score": _calculate_health_score(total_entries, cluster_stats, type_counts),
     }
 
@@ -120,6 +122,28 @@ def export_memory_health(output_path: str = "memory_dashboard/memory_health.json
     print(f"Total entries: {total_entries}")
     print(f"Clusters found: {cluster_stats.get('total_clusters', 0)}")
     return health_data
+
+
+def _calculate_growth_trend(total_entries: int, output_path: str) -> str:
+    """Compare current count with the previous dashboard export."""
+    path = Path(output_path)
+    if not path.exists():
+        return "unknown"
+    try:
+        previous = json.loads(path.read_text())
+        previous_total = int(previous.get("total_entries", total_entries))
+    except Exception:
+        return "unknown"
+    delta = total_entries - previous_total
+    if delta > 10:
+        return "growing_fast"
+    if delta > 0:
+        return "growing"
+    if delta < -10:
+        return "shrinking_fast"
+    if delta < 0:
+        return "shrinking"
+    return "stable"
 
 
 def _calculate_health_score(total: int, cluster_stats: Dict, type_counts: Dict) -> float:

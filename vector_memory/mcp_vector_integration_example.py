@@ -1,19 +1,18 @@
 """
 Example: MCP + Vector Memory Integration
+========================================
 
-Shows how a sub-agent (or Hermes itself) can:
-1. Receive a task via MCP
-2. Use Vector Memory to retrieve relevant past knowledge
-3. Perform work
-4. Store new findings back into Vector Memory
-5. Report results via MCP (which Hermes can also store)
-
-This pattern should become standard for all capable sub-agents.
+Shows how a sub-agent can retrieve relevant long-term memory, synthesize from
+provided evidence, store the resulting finding, and report it through MCP.
 """
 
-from mcp.protocol import MCPProtocol, MessageType, BaseMCPAgent
-from vector_memory import VectorMemory
+from __future__ import annotations
+
 import logging
+from typing import Any
+
+from mcp.protocol import MessageType, BaseMCPAgent
+from vector_memory import VectorMemory
 
 logger = logging.getLogger("IntegratedAgent")
 
@@ -21,51 +20,63 @@ logger = logging.getLogger("IntegratedAgent")
 class ResearchAgentWithMemory(BaseMCPAgent):
     def __init__(self, name: str = "researcher"):
         super().__init__(name=name)
-        self.vm = VectorMemory()  # Shared long-term memory
+        self.vm = VectorMemory()
 
     def get_capabilities(self):
-        return ["web_research", "semantic_memory", "research_synthesis"]
+        return ["evidence_synthesis", "semantic_memory", "research_synthesis"]
 
     def handle_task_request(self, msg):
-        task = msg.payload.get("task", "")
-        context = msg.payload.get("context", {})
+        task = msg.payload.get("task") or msg.payload.get("task_type", "research")
+        context: dict[str, Any] = msg.payload.get("context", {}) or {}
+        project = context.get("project", "general")
 
-        # 1. Retrieve relevant past knowledge
         prior_knowledge = self.vm.get_relevant_context(
-            query=task,
+            query=str(task),
             n_results=5,
-            filter={"project": context.get("project", "general")}
+            filter={"project": project},
+        )
+        logger.info("Retrieved %s chars of prior context", len(prior_knowledge))
+
+        evidence = context.get("evidence") or context.get("notes") or []
+        if isinstance(evidence, str):
+            evidence = [evidence]
+
+        if evidence:
+            evidence_summary = "\n".join(f"- {str(item)[:500]}" for item in evidence[:10])
+        else:
+            evidence_summary = "No new external evidence supplied; result is based on prior vector memory only."
+
+        research_result = (
+            f"Task: {task}\n"
+            f"Project: {project}\n\n"
+            f"Evidence:\n{evidence_summary}\n\n"
+            f"Prior knowledge excerpt:\n{prior_knowledge[:1200]}"
         )
 
-        logger.info(f"Retrieved {len(prior_knowledge)} chars of prior context")
-
-        # 2. Do the actual research work (placeholder - replace with real tools + LLM)
-        research_result = f"Research result for: {task}\nPrior knowledge used: {prior_knowledge[:300]}..."
-
-        # 3. Store the new finding
-        self.vm.add_research_finding(
+        stored_id = self.vm.add_research_finding(
             content=research_result,
-            project=context.get("project", "general"),
-            source_url=context.get("source_url")
+            project=project,
+            source_url=context.get("source_url"),
         )
 
-        # 4. Report back via MCP
         self.mcp.report_result(
             to_agent=msg.from_agent,
             correlation_id=msg.correlation_id,
             result={
-                "summary": research_result[:500],
-                "stored_in_vector_memory": True,
-                "prior_context_used": bool(prior_knowledge)
-            }
+                "summary": research_result[:1000],
+                "stored_in_vector_memory": bool(stored_id),
+                "stored_id": stored_id,
+                "prior_context_used": bool(prior_knowledge),
+                "evidence_items_used": len(evidence),
+                "fabricated": False,
+            },
         )
 
-        # 5. Optionally propose improvement
-        if "self-improving" in task.lower() or "agi" in task.lower():
+        if "self-improving" in str(task).lower() or "agi" in str(task).lower():
             self.mcp.propose_self_improvement(
-                proposal="Automatically consolidate vector memory entries older than 30 days into summaries",
-                rationale="Reduces noise and improves retrieval quality over long time horizons",
-                expected_impact="Better long-term reasoning and fewer duplicate research efforts"
+                proposal="Schedule periodic vector-memory consolidation and importance scoring",
+                rationale="Keeps long-term retrieval compact, auditable, and high signal.",
+                expected_impact="Better long-term reasoning and fewer duplicate research efforts",
             )
 
 

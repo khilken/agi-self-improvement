@@ -21,6 +21,7 @@ It communicates exclusively via MCP and reads/writes to the shared VectorMemory.
 """
 
 import logging
+import re
 import time
 import uuid
 from typing import Any, Dict, List, Optional
@@ -218,23 +219,39 @@ class MemorySynthesizerAgent(BaseMCPAgent):
         }
 
     def _run_importance_scoring(self, context: Dict) -> Dict:
-        """Score memories for importance (future: used for retention policy)."""
-        # Placeholder for more advanced scoring logic
-        # In production this would use LLM judgment + metadata signals
+        """Score memories for importance and persist scores in metadata."""
+        if self.vm is None:
+            return {"status": "error", "message": "VectorMemory is not available"}
         scored = 0
-        memories = self.vm.get_all(limit=200)
+        updated = 0
+        memories = self.vm.get_all(limit=int(context.get("limit", 200)))
+        docs = memories.get("documents", []) or []
+        metas = memories.get("metadatas", []) or []
+        ids = memories.get("ids", []) or []
 
-        for i, doc in enumerate(memories.get("documents", [])):
+        updated_metas = []
+        updated_ids = []
+        for i, doc in enumerate(docs):
             if not doc:
                 continue
-            score = self._llm_importance_score(doc, memories.get("metadatas", [{}])[i])
-            # In a real implementation we would update metadata or store score separately
+            meta = dict(metas[i] if i < len(metas) and metas[i] else {})
+            score = self._llm_importance_score(doc, meta)
+            meta["importance_score"] = round(score, 4)
+            meta["importance_scored_at"] = time.time()
             scored += 1
+            if i < len(ids):
+                updated_ids.append(ids[i])
+                updated_metas.append(meta)
+
+        if updated_ids:
+            self.vm.collection.update(ids=updated_ids, metadatas=updated_metas)
+            updated = len(updated_ids)
 
         return {
             "status": "success",
             "scored_count": scored,
-            "summary": f"Scored importance for {scored} memory entries."
+            "metadata_updated": updated,
+            "summary": f"Scored importance for {scored} memory entries and updated {updated} metadata records."
         }
 
     def _generate_periodic_reflection(self, context: Dict) -> Dict:
@@ -347,11 +364,30 @@ High-quality synthesized summary:"""
             return None
 
     def _llm_importance_score(self, text: str, meta: Dict) -> float:
-        """Return a score from 0.0 to 1.0. Placeholder for now."""
-        # Future: Use LLM to judge long-term value
-        if meta.get("type") in ["reflection", "decision", "project_synthesis"]:
-            return 0.85
-        return 0.6
+        """Return deterministic importance score from content and metadata signals."""
+        score = 0.35
+        memory_type = str(meta.get("type", "")).lower()
+        if memory_type in {"reflection", "decision", "project_synthesis"}:
+            score += 0.35
+        elif memory_type in {"research", "mcp_message", "memory_health_report"}:
+            score += 0.15
+
+        text_l = text.lower()
+        high_signal_terms = [
+            "decision", "root cause", "fix", "bug", "lesson", "rollback",
+            "approval", "risk", "architecture", "test", "verified", "failed",
+        ]
+        score += min(0.2, 0.025 * sum(1 for term in high_signal_terms if term in text_l))
+
+        if len(text) > 2000:
+            score += 0.05
+        if re.search(r"https?://|commit|trace_id|proposal", text_l):
+            score += 0.05
+        if len(text.strip()) < 40:
+            score -= 0.2
+        if meta.get("importance_score") is not None:
+            score = max(score, float(meta.get("importance_score", 0)))
+        return max(0.0, min(1.0, score))
 
     def _llm_generate_reflection(self, combined_memories: str) -> Optional[str]:
         if not ollama:

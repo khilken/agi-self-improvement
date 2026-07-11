@@ -56,7 +56,16 @@ class MemorySynthesizerAgent(BaseMCPAgent):
 
     def __init__(self, name: str = "memory_synthesizer"):
         super().__init__(name=name)
-        self.vm = VectorMemory()  # Shared persistent vector memory
+        try:
+            from config import configure_ollama_env
+            configure_ollama_env()
+        except Exception:
+            pass
+        try:
+            self.vm = VectorMemory()  # Shared persistent vector memory
+        except Exception as e:
+            logger.error(f"VectorMemory init failed: {e}")
+            self.vm = None
 
         # Register custom handler
         self.mcp.register_handler(MessageType.TASK_REQUEST, self.handle_task_request)
@@ -107,7 +116,7 @@ class MemorySynthesizerAgent(BaseMCPAgent):
         )
 
         # Optionally store a high-level summary of what was done
-        if result.get("status") == "success":
+        if result.get("status") == "success" and getattr(self, "vm", None) is not None:
             self.vm.add(
                 content=f"MemorySynthesizer completed {task_type}. Summary: {result.get('summary', '')}",
                 metadata={

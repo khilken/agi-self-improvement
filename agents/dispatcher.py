@@ -2,11 +2,11 @@
 Hermes Task Dispatcher
 ======================
 
-Routes tasks to specialized sub-agents with automatic tracing.
+Routes tasks to specialized sub-agents with automatic tracing and capability-aware routing.
 """
 
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from mcp.protocol import MCPProtocol, MessageType
 from tracing.task_trace import tracer
@@ -15,18 +15,65 @@ from tracing.model_preference import ModelPreference
 logger = logging.getLogger("Dispatcher")
 
 
+# Canonical agent registry: name -> capabilities
+AGENT_REGISTRY: Dict[str, List[str]] = {
+    "researcher": ["research", "web_research", "information_synthesis"],
+    "coder": ["code", "implement", "refactor"],
+    "memory_synthesizer": ["memory_synthesis", "consolidation", "health_report"],
+    "orchestrator": ["orchestrate", "plan"],
+    "evaluator": ["evaluate", "output_evaluation", "reflection"],
+    "meta_improver": ["analyze_traces", "propose_improvements"],
+    "hyper_meta_improver": ["hyper_meta", "improve_meta"],
+    "web_search": ["web_search", "result_synthesis"],
+    "web_scraper": ["web_scrape", "extract"],
+    "self_research": ["self_research"],
+    "arxiv_summarizer": ["arxiv_search", "paper_summarization"],
+    "github_trending": ["github_trending"],
+    "x_twitter_scanner": ["x_scan", "twitter"],
+    "news_research": ["news", "local_news", "national_news"],
+    "auto_debug": ["debug", "log_analysis"],
+    "advanced_coding": ["advanced_code", "tdd"],
+    "comprehensive_debug_testing": ["test", "coverage", "debug_test"],
+    "knowledge_curator": ["knowledge", "deduplicate"],
+    "safety_governance": ["safety", "risk_review"],
+    "long_horizon_planner": ["plan_long", "goal_decompose"],
+    "experimentation": ["experiment", "ab_test"],
+    "self_verification": ["verify", "check_improvement"],
+    "version_control_rollback": ["rollback", "version"],
+    "resource_monitor": ["resource", "cost", "usage"],
+    "external_integration": ["slack", "telegram", "notion", "email"],
+}
+
+
 class HermesDispatcher:
     def __init__(self, agent_name: str = "hermes_dispatcher"):
         self.mcp = MCPProtocol(agent_name=agent_name)
         self.model_pref = ModelPreference()
-        self.agents = {
-            "researcher": "researcher",
-            "coder": "coder",
-            "memory_synthesizer": "memory_synthesizer",
-            "orchestrator": "orchestrator",
-            "evaluator": "evaluator",
-            "meta_improver": "meta_improver",
-        }
+        # Keep backward-compatible map of known targets
+        self.agents = {name: name for name in AGENT_REGISTRY}
+
+    def resolve_agent(self, task_type: str, preferred: Optional[str] = None) -> str:
+        """Pick an agent by explicit name or by capability match."""
+        if preferred and preferred in self.agents:
+            return preferred
+        task_l = (task_type or "").lower()
+        for name, caps in AGENT_REGISTRY.items():
+            if task_l in caps or any(task_l in c for c in caps):
+                return name
+        # Heuristics
+        if "research" in task_l or "search" in task_l:
+            return "researcher"
+        if "code" in task_l or "implement" in task_l:
+            return "coder"
+        if "eval" in task_l:
+            return "evaluator"
+        if "memory" in task_l or "synth" in task_l:
+            return "memory_synthesizer"
+        if "debug" in task_l or "test" in task_l:
+            return "comprehensive_debug_testing"
+        if "news" in task_l:
+            return "news_research"
+        return preferred or "researcher"
 
     def dispatch(
         self,
@@ -35,16 +82,23 @@ class HermesDispatcher:
         context: Optional[Dict[str, Any]] = None,
         correlation_id: Optional[str] = None,
     ):
-        if target_agent not in self.agents:
-            logger.warning(f"Unknown agent: {target_agent}")
-            return None
+        resolved = self.resolve_agent(task_type, preferred=target_agent)
+        if resolved not in self.agents:
+            # Allow dispatch to unregistered but named agents (queues still work)
+            logger.warning(f"Agent {resolved} not in registry; dispatching anyway")
+            self.agents[resolved] = resolved
 
         context = context or {}
 
-        # Start trace automatically
+        # Preferred model annotation for downstream agents
+        try:
+            context.setdefault("preferred_model", self.model_pref.get_model_for_task(task_type))
+        except Exception:
+            pass
+
         trace_id = tracer.start_trace(
             task_type=task_type,
-            agent=target_agent,
+            agent=resolved,
             input_data=context,
         )
         context["trace_id"] = trace_id
@@ -54,13 +108,13 @@ class HermesDispatcher:
             "context": context,
         }
 
-        logger.info(f"Dispatching {task_type} to {target_agent} (trace={trace_id})")
+        logger.info(f"Dispatching {task_type} → {resolved} (trace={trace_id})")
 
         self.mcp.send(
-            to_agent=target_agent,
+            to_agent=resolved,
             msg_type=MessageType.TASK_REQUEST,
             payload=payload,
-            correlation_id=correlation_id,
+            correlation_id=correlation_id or trace_id,
         )
         return trace_id
 
@@ -73,31 +127,36 @@ class HermesDispatcher:
     def dispatch_evaluation(self, output: Dict, original_task: Dict):
         return self.dispatch("evaluator", "evaluate", {
             "output": output,
-            "original_task": original_task
+            "original_task": original_task,
         })
 
     def dispatch_meta_analysis(self):
         return self.dispatch("meta_improver", "analyze_traces", {})
 
     def run_with_reflection(self, target_agent: str, task_type: str, context: Dict):
-            """
-            Executes a task with automatic reflection:
-            1. Dispatch to target agent
-            2. Automatically dispatch evaluation request to Evaluator
-            3. Return trace_id for tracking
-            """
-            trace_id = self.dispatch(target_agent, task_type, context)
+        """
+        Executes a task with automatic reflection:
+        1. Dispatch to target agent
+        2. Dispatch evaluation to Evaluator
+        3. Dispatch meta analysis to Meta-Improver
+        """
+        context = dict(context or {})
+        trace_id = self.dispatch(target_agent, task_type, context)
 
-            # Automatically dispatch to Evaluator with the trace_id
-            eval_context = {
-                "original_task": context,
-                "trace_id": trace_id
-            }
-            self.dispatch("evaluator", "evaluate", eval_context)
+        eval_context = {
+            "original_task": context,
+            "output": {"note": "pending agent result; evaluate intent/completeness"},
+            "trace_id": trace_id,
+        }
+        self.dispatch("evaluator", "evaluate", eval_context)
 
-            logger.info(f"Reflection loop initiated for trace {trace_id}")
+        self.dispatch("meta_improver", "analyze_traces", {
+            "trace_id": trace_id,
+            "trigger": "run_with_reflection",
+        })
 
-            return {
-                "trace_id": trace_id,
-                "message": "Task + Evaluation dispatched. Reflection loop active."
-            }
+        logger.info(f"Reflection loop initiated for trace {trace_id}")
+        return {
+            "trace_id": trace_id,
+            "message": "Task + Evaluation + Meta-Improver dispatched. Reflection loop active.",
+        }

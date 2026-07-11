@@ -97,6 +97,8 @@ class ApprovalGate:
         for f in self.storage_dir.glob("approval_*.json"):
             with open(f, "r") as file:
                 data = json.load(file)
+                if isinstance(data.get("status"), str):
+                    data["status"] = ApprovalStatus(data["status"])
                 record = ApprovalRecord(**data)
                 if record.status == ApprovalStatus.PENDING:
                     pending.append(record)
@@ -113,4 +115,6 @@ class ApprovalGate:
             return None
         with open(filepath, "r") as f:
             data = json.load(f)
+            if isinstance(data.get("status"), str):
+                data["status"] = ApprovalStatus(data["status"])
         return ApprovalRecord(**data)

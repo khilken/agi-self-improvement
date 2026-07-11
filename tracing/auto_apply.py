@@ -35,24 +35,27 @@ class AutoApplyEngine:
         """
         applied = []
 
-        # Get all proposals
         all_proposals = self.proposal_store.list_all()
 
         for proposal in all_proposals:
             if proposal.risk_level != RiskLevel.LOW:
                 continue
 
-            # Check if already processed
             approval = self.approval_gate.get_status(proposal.id)
-            if approval and approval.status != "pending":
-                continue
+            if approval and str(getattr(approval, "status", approval)) not in (
+                "pending",
+                "ApprovalStatus.PENDING",
+                "PENDING",
+            ):
+                # Already handled
+                status_val = getattr(approval, "status", approval)
+                if str(status_val).lower() not in ("pending", "approvalstatus.pending"):
+                    continue
 
-            # Self-verification before auto-apply
             if not self._verify_proposal(proposal):
                 logger.warning(f"Proposal {proposal.id} failed verification - skipping")
                 continue
 
-            # Auto-apply
             try:
                 self._apply_proposal(proposal)
                 applied.append(proposal.id)
@@ -62,25 +65,30 @@ class AutoApplyEngine:
 
         return applied
 
-    def _apply_proposal(self, proposal):
-        """Apply a proposal (placeholder for real implementation)."""
-        # In a real system, this would:
-        # - Apply code diffs
-        # - Update prompt files
-        # - Register new skills
-        # etc.
+    def _verify_proposal(self, proposal) -> bool:
+        """Lightweight safety checks before auto-applying a low-risk proposal."""
+        if not proposal or not getattr(proposal, "id", None):
+            return False
+        if not getattr(proposal, "title", None):
+            return False
+        if proposal.risk_level != RiskLevel.LOW:
+            return False
+        if not getattr(proposal, "reason", None):
+            logger.warning(f"Proposal {proposal.id} missing reason")
+            return False
+        return True
 
-        # For now, just record the application
+    def _apply_proposal(self, proposal):
+        """Apply a proposal (record + mark approved for low-risk)."""
         self.history.record(HistoryEvent(
             event_type=HistoryEventType.APPLIED,
             proposal_id=proposal.id,
             actor="auto_apply_engine",
-            details={"type": proposal.type.value, "title": proposal.title}
+            details={"type": proposal.type.value, "title": proposal.title},
         ))
 
-        # Mark as approved (auto)
         self.approval_gate.approve(
             proposal.id,
             reviewer="auto_apply_engine",
-            notes="Automatically approved (low risk)"
+            notes="Automatically approved (low risk)",
         )

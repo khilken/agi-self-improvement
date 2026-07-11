@@ -279,6 +279,29 @@ class MCPProtocol:
             payload={"key": key, "value": value, "namespace": namespace}
         )
 
+
+    def route_task(self, task_type: str, payload: Dict[str, Any], preferred_agent: Optional[str] = None,
+                   correlation_id: Optional[str] = None) -> MCPMessage:
+        """
+        Capability-aware task routing.
+        Uses agents.dispatcher.AGENT_REGISTRY when available; falls back to preferred or researcher.
+        """
+        target = preferred_agent or "researcher"
+        try:
+            from agents.dispatcher import HermesDispatcher
+            target = HermesDispatcher().resolve_agent(task_type, preferred=preferred_agent)
+        except Exception:
+            pass
+        body = dict(payload or {})
+        body.setdefault("task_type", task_type)
+        return self.send(
+            to_agent=target,
+            msg_type=MessageType.TASK_REQUEST,
+            payload=body,
+            correlation_id=correlation_id,
+            tags=["routed", task_type],
+        )
+
     def propose_self_improvement(self, proposal: str, rationale: str, expected_impact: str):
         return self.send(
             to_agent="hermes",  # or a dedicated meta-agent

@@ -30,7 +30,7 @@
       "test_writing",
       "architecture_review"
     ],
-    "last_seen": 1783642330.122494,
+    "last_seen": 1783800358.570445,
     "metadata": {}
   },
   "orchestrator": {
@@ -60,6 +60,48 @@
       "reflection"
     ],
     "last_seen": 1783642330.342266,
+    "metadata": {}
+  },
+  "auto_debug": {
+    "capabilities": [
+      "log_analysis",
+      "error_detection",
+      "automatic_fix_proposal",
+      "safe_auto_fix"
+    ],
+    "last_seen": 1783800358.5699499,
+    "metadata": {}
+  },
+  "advanced_coding": {
+    "capabilities": [
+      "multi_file_refactoring",
+      "architecture_aware_coding",
+      "test_driven_development",
+      "code_review",
+      "large_scale_refactoring"
+    ],
+    "last_seen": 1783800358.5708082,
+    "metadata": {}
+  },
+  "comprehensive_debug_testing": {
+    "capabilities": [
+      "test_generation",
+      "coverage_analysis",
+      "root_cause_analysis",
+      "safe_auto_fix",
+      "regression_detection"
+    ],
+    "last_seen": 1783800358.571129,
+    "metadata": {}
+  },
+  "safety_governance": {
+    "capabilities": [
+      "risk_assessment",
+      "compliance_check",
+      "alignment_review",
+      "governance_enforcement"
+    ],
+    "last_seen": 1783800362.2211032,
     "metadata": {}
   }
 }

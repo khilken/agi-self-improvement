@@ -1,130 +1,102 @@
 #!/bin/bash
-#
 # Hermes One-Command Setup Script
 # ===============================
-#
-# This script sets up the complete Hermes self-improving memory system.
-#
-# Usage:
-#   chmod +x setup_hermes.sh
-#   ./setup_hermes.sh
-#
+# Safe macOS/Linux setup using a project virtualenv. Does not install into the
+# externally-managed system Python.
 
-set -e
+set -euo pipefail
 
-# Colors
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
 YELLOW='\033[1;33m'
 RED='\033[0;31m'
-NC='\033[0m' # No Color
+NC='\033[0m'
 
-echo -e "${BLUE}"
+PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$PROJECT_DIR"
+
+PYTHON_BIN="${PYTHON_BIN:-python3}"
+VENV_DIR="${VENV_DIR:-$PROJECT_DIR/.venv}"
+OLLAMA_HOST="${OLLAMA_HOST:-http://192.168.1.111:11434}"
+HERMES_DEFAULT_MODEL="${HERMES_DEFAULT_MODEL:-qwen2.5:32b}"
+
+printf "%b\n" "$BLUE"
 echo "╔════════════════════════════════════════════════════════════╗"
 echo "║           HERMES - Self-Sustaining Personal AGI            ║"
 echo "║                    One-Command Setup                       ║"
 echo "╚════════════════════════════════════════════════════════════╝"
-echo -e "${NC}"
+printf "%b\n" "$NC"
 
-# Check if running from correct directory
 if [ ! -f "Hermes_System_Prompt.md" ]; then
-    echo -e "${RED}Error: Please run this script from inside the Hermes/ directory.${NC}"
+    printf "%bError: Please run this script from inside the Hermes project directory.%b\n" "$RED" "$NC"
     exit 1
 fi
+printf "%b✓ Project directory: %s%b\n" "$GREEN" "$PROJECT_DIR" "$NC"
 
-echo -e "${GREEN}✓ Running from Hermes directory${NC}"
+printf "\n%b[1/6] Checking Python...%b\n" "$BLUE" "$NC"
+if ! command -v "$PYTHON_BIN" >/dev/null 2>&1; then
+    printf "%bPython not found: %s%b\n" "$RED" "$PYTHON_BIN" "$NC"
+    exit 1
+fi
+"$PYTHON_BIN" --version
 
-# ============================================
-# 1. Check for Ollama
-# ============================================
-echo -e "\n${BLUE}[1/5] Checking for Ollama...${NC}"
+printf "\n%b[2/6] Creating/updating virtualenv...%b\n" "$BLUE" "$NC"
+if [ ! -d "$VENV_DIR" ]; then
+    "$PYTHON_BIN" -m venv "$VENV_DIR"
+fi
+# shellcheck disable=SC1091
+source "$VENV_DIR/bin/activate"
+python -m pip install --upgrade pip setuptools wheel
 
-if ! command -v ollama &> /dev/null; then
-    echo -e "${YELLOW}Ollama not found.${NC}"
-    echo "Please install Ollama first:"
-    echo "  → https://ollama.com/download"
-    echo ""
-    read -p "Have you installed Ollama? (y/n): " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        echo -e "${RED}Please install Ollama and run this script again.${NC}"
-        exit 1
-    fi
+printf "\n%b[3/6] Installing Python dependencies...%b\n" "$BLUE" "$NC"
+if [ ! -f requirements.txt ]; then
+    printf "%brequirements.txt missing%b\n" "$RED" "$NC"
+    exit 1
+fi
+python -m pip install -r requirements.txt
+
+printf "\n%b[4/6] Checking Ollama endpoint...%b\n" "$BLUE" "$NC"
+export OLLAMA_HOST HERMES_DEFAULT_MODEL PYTHONPATH="$PROJECT_DIR${PYTHONPATH:+:$PYTHONPATH}"
+python - <<'PY'
+import os, sys, urllib.request, json
+host = os.environ.get('OLLAMA_HOST', 'http://127.0.0.1:11434').rstrip('/')
+try:
+    with urllib.request.urlopen(host + '/api/tags', timeout=5) as resp:
+        data = json.loads(resp.read().decode())
+    models = [m.get('name') for m in data.get('models', [])]
+    print(f"✓ Ollama reachable: {host}")
+    print("  Models:", ", ".join(models[:10]) or "none listed")
+except Exception as exc:
+    print(f"⚠ Ollama not reachable at {host}: {exc}")
+    print("  Setup can continue; model-dependent agents will use fallbacks until Ollama is reachable.")
+PY
+
+if command -v ollama >/dev/null 2>&1; then
+    printf "\n%b[optional] Ensuring embedding model exists locally...%b\n" "$BLUE" "$NC"
+    OLLAMA_HOST="$OLLAMA_HOST" ollama pull nomic-embed-text || printf "%bCould not pull nomic-embed-text; continuing.%b\n" "$YELLOW" "$NC"
 else
-    echo -e "${GREEN}✓ Ollama is installed${NC}"
+    printf "%bollama CLI not found locally; using remote endpoint only.%b\n" "$YELLOW" "$NC"
 fi
 
-# ============================================
-# 2. Install Python Dependencies
-# ============================================
-echo -e "\n${BLUE}[2/5] Installing Python dependencies...${NC}"
+printf "\n%b[5/6] Creating runtime directories...%b\n" "$BLUE" "$NC"
+mkdir -p tasks memory/vector_db mcp/queues logs logs/traces logs/improvements logs/approvals logs/history logs/backups
+printf "%b✓ Runtime directories ready%b\n" "$GREEN" "$NC"
 
-pip install --upgrade pip > /dev/null 2>&1
+printf "\n%b[6/6] Running verification checks...%b\n" "$BLUE" "$NC"
+python scripts/run_tests.py --no-pytest
 
-PACKAGES=(
-    "chromadb"
-    "ollama"
-    "hdbscan"
-    "umap-learn"
-    "scikit-learn"
-    "numpy"
-)
-
-for package in "${PACKAGES[@]}"; do
-    echo -e "  Installing ${package}..."
-    pip install "$package" --quiet
-done
-
-echo -e "${GREEN}✓ All Python packages installed${NC}"
-
-# ============================================
-# 3. Pull Required Ollama Models
-# ============================================
-echo -e "\n${BLUE}[3/5] Pulling required Ollama models...${NC}"
-
-echo -e "  Pulling nomic-embed-text (for embeddings)..."
-ollama pull nomic-embed-text
-
-echo -e "  Pulling qwen2.5:32b (recommended reasoning model)..."
-ollama pull qwen2.5:32b || echo -e "${YELLOW}Warning: Could not pull qwen2.5:32b. You can pull it manually later.${NC}"
-
-echo -e "${GREEN}✓ Ollama models ready${NC}"
-
-# ============================================
-# 4. Create necessary directories
-# ============================================
-echo -e "\n${BLUE}[4/5] Creating directories...${NC}"
-
-mkdir -p tasks
-mkdir -p memory/vector_db
-
-echo -e "${GREEN}✓ Directories created${NC}"
-
-# ============================================
-# 5. Final Instructions
-# ============================================
-echo -e "\n${BLUE}[5/5] Setup Complete!${NC}"
+printf "\n%b════════════════════════════════════════════════════════════%b\n" "$GREEN" "$NC"
+printf "%b           Hermes setup complete%b\n" "$GREEN" "$NC"
+printf "%b════════════════════════════════════════════════════════════%b\n" "$GREEN" "$NC"
 echo ""
-echo -e "${GREEN}════════════════════════════════════════════════════════════${NC}"
-echo -e "${GREEN}           Hermes is ready to use!${NC}"
-echo -e "${GREEN}════════════════════════════════════════════════════════════${NC}"
+echo "Activate environment:"
+echo "  source '$VENV_DIR/bin/activate'"
 echo ""
-echo "Recommended way to run Hermes:"
+echo "Start stack:"
+echo "  ./soft_start_hermes.sh"
 echo ""
-echo -e "${YELLOW}Terminal 1 - Dashboard Server:${NC}"
-echo "  python memory_dashboard/run_dashboard_server.py"
+echo "Dashboard:"
+echo "  http://localhost:8765/memory_health_dashboard.html"
 echo ""
-echo -e "${YELLOW}Terminal 2 - Auto Data Updates:${NC}"
-echo "  python memory_dashboard/schedule_memory_export.py"
-echo ""
-echo -e "${YELLOW}Terminal 3 - MemorySynthesizer (with Task Queue):${NC}"
-echo "  python agents/memory_synthesizer.py"
-echo ""
-echo "Then open your browser at:"
-echo -e "${BLUE}http://localhost:8765/memory_health_dashboard.html${NC}"
-echo ""
-echo "You can now click buttons like 'Optimize Memory' in the dashboard"
-echo "and the MemorySynthesizer will automatically process them."
-echo ""
-echo -e "${GREEN}Happy building!${NC}"
-echo ""
+echo "Ollama endpoint: $OLLAMA_HOST"
+echo "Default model:   $HERMES_DEFAULT_MODEL"

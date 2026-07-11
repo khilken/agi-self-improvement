@@ -5,6 +5,8 @@ Proposal Application & Rollback Engine
 Applies full-file replacements or unified diffs with backups and rollback.
 """
 
+from __future__ import annotations
+
 from pathlib import Path
 from datetime import datetime
 from typing import Tuple

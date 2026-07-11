@@ -2,18 +2,23 @@
 Comprehensive Debugging & Testing Agent
 =======================================
 
-Advanced agent for:
-- Automated test generation
-- Code coverage analysis
-- Root cause analysis
-- Safe automatic fixing with rollback
+Runs real local verification commands and summarizes evidence. It does not claim
+coverage increases or fixes unless backed by command output.
 """
 
+from __future__ import annotations
+
 import logging
+import os
+import subprocess
+import sys
+from pathlib import Path
 from typing import List
+
 from mcp.protocol import BaseMCPAgent, MessageType, MCPMessage
 
 logger = logging.getLogger("ComprehensiveDebugTestingAgent")
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 
 class ComprehensiveDebugTestingAgent(BaseMCPAgent):
@@ -27,29 +32,50 @@ class ComprehensiveDebugTestingAgent(BaseMCPAgent):
             "coverage_analysis",
             "root_cause_analysis",
             "safe_auto_fix",
-            "regression_detection"
+            "regression_detection",
         ]
+
+    def run_checks(self, focus: str = "general") -> dict:
+        commands = [
+            [sys.executable, "scripts/run_tests.py", "--no-pytest"],
+        ]
+        results = []
+        for command in commands:
+            proc = subprocess.run(
+                command,
+                cwd=PROJECT_ROOT,
+                text=True,
+                capture_output=True,
+                timeout=240,
+                env={**os.environ, "PYTHONPATH": str(PROJECT_ROOT)},
+            )
+            output = (proc.stdout + proc.stderr).splitlines()
+            results.append({
+                "command": " ".join(command),
+                "exit_code": proc.returncode,
+                "tail": output[-40:],
+            })
+        passed = all(r["exit_code"] == 0 for r in results)
+        return {
+            "status": "completed" if passed else "failed",
+            "focus": focus,
+            "checks": results,
+            "tests_generated": 0,
+            "coverage_increase": None,
+            "fixes_applied": 0,
+            "notes": "Real verification run completed; no automatic source edits performed.",
+        }
 
     def handle_task_request(self, msg: MCPMessage):
         context = msg.payload.get("context", {})
         focus = context.get("focus", "general")
-
-        logger.info(f"ComprehensiveDebugTesting received focus: {focus}")
-
-        result = {
-            "status": "completed",
-            "focus": focus,
-            "tests_generated": 8,
-            "coverage_increase": "12%",
-            "fixes_applied": 3,
-            "notes": "Root cause identified and safe fixes applied with rollback support"
-        }
-
+        logger.info("ComprehensiveDebugTesting received focus: %s", focus)
+        result = self.run_checks(focus)
         self.mcp.send_message(
             to=msg.from_agent,
             message_type=MessageType.TASK_RESULT,
             payload=result,
-            correlation_id=msg.correlation_id
+            correlation_id=msg.correlation_id,
         )
 
 

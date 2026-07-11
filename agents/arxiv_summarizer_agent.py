@@ -6,11 +6,12 @@ Specialized agent for fetching, summarizing, and extracting insights from arXiv 
 """
 
 import logging
-import ollama
 import json
 from typing import List
 
 from mcp.protocol import BaseMCPAgent, MessageType, MCPMessage
+from config import get_ollama_client, OLLAMA_DEFAULT_MODEL, configure_ollama_env
+configure_ollama_env()
 
 logger = logging.getLogger("ArxivSummarizerAgent")
 
@@ -25,12 +26,16 @@ class ArxivSummarizerAgent(BaseMCPAgent):
             "arxiv_search",
             "paper_summarization",
             "insight_extraction",
-            "trend_analysis"
+            "trend_analysis",
         ]
 
-    def _call_llm(self, prompt: str, model: str = "qwen2.5:32b"):
+    def _call_llm(self, prompt: str, model: str | None = None):
         try:
-            response = ollama.chat(model=model, messages=[{"role": "user", "content": prompt}])
+            model = model or OLLAMA_DEFAULT_MODEL
+            response = get_ollama_client().chat(
+                model=model,
+                messages=[{"role": "user", "content": prompt}],
+            )
             return response["message"]["content"]
         except Exception as e:
             logger.error(f"LLM call failed: {e}")
@@ -42,6 +47,10 @@ class ArxivSummarizerAgent(BaseMCPAgent):
 
         logger.info(f"ArxivSummarizer received query: {query}")
 
+        insights = self._call_llm(
+            f"Summarize current research trends on arXiv for: {query}"
+        ) or f"Key trends in {query} research"
+
         result = {
             "status": "completed",
             "query": query,
@@ -49,17 +58,17 @@ class ArxivSummarizerAgent(BaseMCPAgent):
                 {
                     "title": f"Example Paper on {query}",
                     "summary": "This paper proposes a novel approach...",
-                    "url": "https://arxiv.org/abs/xxxx.xxxxx"
+                    "url": "https://arxiv.org/abs/xxxx.xxxxx",
                 }
             ],
-            "insights": f"Key trends in {query} research"
+            "insights": insights,
         }
 
         self.mcp.send_message(
             to=msg.from_agent,
             message_type=MessageType.TASK_RESULT,
             payload=result,
-            correlation_id=msg.correlation_id
+            correlation_id=msg.correlation_id,
         )
 
 

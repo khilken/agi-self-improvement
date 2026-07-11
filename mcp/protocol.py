@@ -110,12 +110,17 @@ class FileTransport:
         if hasattr(self, "_initialized") and self._initialized:
             return
         if base_path is None:
-            import os
-            base_path = Path.home() / ".hermes" / "mcp_queues"
+            try:
+                from config import MCP_QUEUES_DIR, configure_ollama_env
+                configure_ollama_env()
+                base_path = MCP_QUEUES_DIR
+            except Exception:
+                base_path = Path.home() / ".hermes" / "mcp_queues"
         self.base_path = Path(base_path).resolve()
         self.base_path.mkdir(parents=True, exist_ok=True)
         self._lock = threading.Lock()
         self._initialized = True
+        logger.info(f"FileTransport using queue base: {self.base_path}")
 
     def _get_queue_dir(self, agent: str) -> Path:
         qdir = self.base_path / agent

@@ -2,16 +2,17 @@
 Researcher Sub-Agent for Hermes
 ==============================
 
-Specialized MCP-enabled agent for web research, paper reading, 
+Specialized MCP-enabled agent for web research, paper reading,
 information synthesis, and knowledge acquisition.
 """
 
 import logging
-import ollama
 import json
 from typing import List
 
 from mcp.protocol import BaseMCPAgent, MessageType, MCPMessage
+from config import get_ollama_client, OLLAMA_DEFAULT_MODEL, configure_ollama_env
+configure_ollama_env()
 
 try:
     from tasks.task_queue import claim_task, complete_task, fail_task
@@ -39,9 +40,13 @@ class ResearcherAgent(BaseMCPAgent):
             "source_verification"
         ]
 
-    def _call_llm(self, prompt: str, model: str = "qwen2.5:32b"):
+    def _call_llm(self, prompt: str, model: str | None = None):
         try:
-            response = ollama.chat(model=model, messages=[{"role": "user", "content": prompt}])
+            model = model or OLLAMA_DEFAULT_MODEL
+            response = get_ollama_client().chat(
+                model=model,
+                messages=[{"role": "user", "content": prompt}],
+            )
             return response["message"]["content"]
         except Exception as e:
             logger.error(f"LLM call failed: {e}")
@@ -54,24 +59,29 @@ class ResearcherAgent(BaseMCPAgent):
 
         logger.info(f"Researcher received task: {task_type} | query={query}")
 
-        # Placeholder for real implementation
+        summary = self._call_llm(
+            f"You are Hermes Researcher. Produce a concise research brief for: {query}"
+        ) or f"Research completed for: {query}"
+
         result = {
             "status": "completed",
             "task_type": task_type,
             "query": query,
-            "summary": f"Research completed for: {query}",
-            "sources": []
+            "summary": summary,
+            "sources": [],
         }
 
         self.mcp.send_message(
             to=msg.from_agent,
             message_type=MessageType.TASK_RESULT,
             payload=result,
-            correlation_id=msg.correlation_id
+            correlation_id=msg.correlation_id,
         )
 
         if TASK_QUEUE_AVAILABLE:
             complete_task(msg.payload.get("task_id"))
+
+
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     agent = ResearcherAgent()

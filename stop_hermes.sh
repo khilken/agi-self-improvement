@@ -23,6 +23,17 @@ else
     pkill -f "evaluator_agent.py" || true
     pkill -f "meta_improver_agent.py" || true
     pkill -f "orchestrator_agent.py" || true
+    pkill -f "hyper_meta_improver_agent.py" || true
 fi
+
+# Fallback cleanup for any leftover agent processes
+pkill -f "run_dashboard_server.py" 2>/dev/null || true
+pkill -f "memory_synthesizer.py" 2>/dev/null || true
+pkill -f "researcher_agent.py" 2>/dev/null || true
+pkill -f "coder_agent.py" 2>/dev/null || true
+pkill -f "evaluator_agent.py" 2>/dev/null || true
+pkill -f "meta_improver_agent.py" 2>/dev/null || true
+pkill -f "orchestrator_agent.py" 2>/dev/null || true
+pkill -f "hyper_meta_improver_agent.py" 2>/dev/null || true
 
 echo "✅ Hermes stack stopped."

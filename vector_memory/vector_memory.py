@@ -67,13 +67,22 @@ class VectorMemory:
         persist_directory: str = "memory/vector_db",
         collection_name: str = "hermes_knowledge",
         embedding_model: str = "nomic-embed-text",   # Excellent local embedding model via Ollama
-        ollama_host: str = "http://localhost:11434",
+        ollama_host: str | None = None,
     ):
+        try:
+            from config import OLLAMA_HOST, OLLAMA_EMBED_MODEL, configure_ollama_env
+            configure_ollama_env()
+            default_host = OLLAMA_HOST
+            default_embed = OLLAMA_EMBED_MODEL
+        except Exception:
+            default_host = "http://192.168.1.111:11434"
+            default_embed = "nomic-embed-text"
+
         self.persist_directory = Path(persist_directory)
         self.persist_directory.mkdir(parents=True, exist_ok=True)
         self.collection_name = collection_name
-        self.embedding_model = embedding_model
-        self.ollama_host = ollama_host
+        self.embedding_model = embedding_model or default_embed
+        self.ollama_host = ollama_host or default_host
 
         if not CHROMA_AVAILABLE:
             raise ImportError("chromadb is required for VectorMemory. Install with: pip install chromadb")

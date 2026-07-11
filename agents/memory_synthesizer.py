@@ -39,9 +39,12 @@ except ImportError:
     list_pending_tasks = claim_task = complete_task = fail_task = lambda *a, **k: None
 
 try:
-    import ollama
-except ImportError:
+    from config import get_ollama_client, OLLAMA_DEFAULT_MODEL, configure_ollama_env
+    configure_ollama_env()
+    ollama = get_ollama_client()
+except Exception:
     ollama = None
+    OLLAMA_DEFAULT_MODEL = "qwen2.5:32b"
 
 logger = logging.getLogger("MemorySynthesizer")
 
@@ -325,7 +328,7 @@ Content:
 High-quality synthesized summary:"""
 
             response = ollama.chat(
-                model="qwen2.5:32b",  # or qwen3:32b / any strong model available
+                model=OLLAMA_DEFAULT_MODEL,
                 messages=[{"role": "user", "content": prompt}],
                 options={"temperature": 0.3, "num_ctx": 16384}
             )
@@ -354,7 +357,7 @@ Recent memories:
 Periodic Reflection:"""
 
             response = ollama.chat(
-                model="qwen2.5:32b",
+                model=OLLAMA_DEFAULT_MODEL,
                 messages=[{"role": "user", "content": prompt}],
                 options={"temperature": 0.4}
             )

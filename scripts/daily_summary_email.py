@@ -17,6 +17,21 @@ import os
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+
+def load_env_file(path: Path):
+    """Load simple KEY=VALUE lines without requiring python-dotenv."""
+    if not path.exists():
+        return
+    for line in path.read_text().splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        os.environ.setdefault(key.strip(), value.strip().strip('"').strip("'"))
+
+
+load_env_file(Path.home() / ".hermes" / ".env")
+
 from tracing.history import ImprovementHistory
 from tracing.proposal import ProposalStore
 from tracing.approval import ApprovalGate

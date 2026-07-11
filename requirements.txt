@@ -1,0 +1,9 @@
+chromadb>=0.5
+ollama>=0.3
+numpy>=1.26
+scikit-learn>=1.4
+flask>=3.0
+pytest>=8.0
+pygount>=1.8
+hdbscan>=0.8; platform_machine != 'armv7l'
+umap-learn>=0.5

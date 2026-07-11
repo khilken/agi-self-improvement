@@ -6,10 +6,30 @@ Hermes Web Dashboard (Improved)
 Interactive dashboard for reviewing proposals, approvals, and system status.
 """
 
-from flask import Flask, render_template_string, request, redirect, url_for
 from pathlib import Path
 import sys
 sys.path.insert(0, str(Path(__file__).parent.parent))
+
+try:
+    from flask import Flask, render_template_string, request, redirect, url_for
+    FLASK_AVAILABLE = True
+except ImportError:
+    FLASK_AVAILABLE = False
+
+    class _DummyFlask:
+        def route(self, *args, **kwargs):
+            def decorator(func):
+                return func
+            return decorator
+
+        def run(self, *args, **kwargs):
+            raise RuntimeError("Flask is not installed. Install dependencies with: pip install -r requirements.txt")
+
+    Flask = lambda name: _DummyFlask()  # type: ignore
+    render_template_string = lambda *args, **kwargs: "Flask is not installed"  # type: ignore
+    request = None  # type: ignore
+    redirect = lambda target: target  # type: ignore
+    url_for = lambda name: name  # type: ignore
 
 from tracing.proposal import ProposalStore
 from tracing.approval import ApprovalGate, ApprovalStatus

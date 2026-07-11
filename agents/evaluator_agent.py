@@ -5,6 +5,8 @@ Evaluator Agent for Hermes (Production LLM Version)
 Uses Ollama for high-quality output evaluation and reflection.
 """
 
+from __future__ import annotations
+
 import logging
 import json
 from typing import List, Dict, Any, Tuple

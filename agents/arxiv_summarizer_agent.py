@@ -5,6 +5,8 @@ arXiv Paper Summarizer Agent
 Specialized agent for fetching, summarizing, and extracting insights from arXiv papers.
 """
 
+from __future__ import annotations
+
 import logging
 import json
 from typing import List

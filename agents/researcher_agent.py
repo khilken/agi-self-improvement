@@ -6,6 +6,8 @@ Specialized MCP-enabled agent for web research, paper reading,
 information synthesis, and knowledge acquisition.
 """
 
+from __future__ import annotations
+
 import logging
 import json
 from typing import List

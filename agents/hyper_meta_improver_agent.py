@@ -117,3 +117,10 @@ class HyperMetaImproverAgent(BaseMCPAgent):
             "proposals": [p.to_dict() for p in proposals],
             "meta_traces_analyzed": len(meta_traces)
         }
+
+
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
+    from agents.base_runner import run_agent
+
+    run_agent(HyperMetaImproverAgent())

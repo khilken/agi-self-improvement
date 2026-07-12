@@ -15,10 +15,22 @@ NC='\033[0m'
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$PROJECT_DIR"
 
-PYTHON_BIN="${PYTHON_BIN:-python3}"
+if [ -n "${PYTHON_BIN:-}" ]; then
+    PYTHON_BIN="$PYTHON_BIN"
+elif command -v python3.11 >/dev/null 2>&1; then
+    PYTHON_BIN="python3.11"
+else
+    PYTHON_BIN="python3"
+fi
 VENV_DIR="${VENV_DIR:-$PROJECT_DIR/.venv}"
 OLLAMA_HOST="${OLLAMA_HOST:-http://192.168.1.111:11434}"
 HERMES_DEFAULT_MODEL="${HERMES_DEFAULT_MODEL:-qwen2.5:32b}"
+ORIGINAL_PYTHONPATH="${PYTHONPATH:-}"
+
+# Keep setup hermetic. Hermes desktop sessions can inject the global Hermes
+# source tree and venv into PYTHONPATH; if pip sees those paths, it may skip
+# installing dependencies into this project's .venv.
+unset PYTHONPATH
 
 printf "%b\n" "$BLUE"
 echo "╔════════════════════════════════════════════════════════════╗"
@@ -56,7 +68,12 @@ fi
 python -m pip install -r requirements.txt
 
 printf "\n%b[4/6] Checking Ollama endpoint...%b\n" "$BLUE" "$NC"
-export OLLAMA_HOST HERMES_DEFAULT_MODEL PYTHONPATH="$PROJECT_DIR${PYTHONPATH:+:$PYTHONPATH}"
+if [ -n "$ORIGINAL_PYTHONPATH" ]; then
+    export PYTHONPATH="$PROJECT_DIR:$ORIGINAL_PYTHONPATH"
+else
+    export PYTHONPATH="$PROJECT_DIR"
+fi
+export OLLAMA_HOST HERMES_DEFAULT_MODEL
 python - <<'PY'
 import os, sys, urllib.request, json
 host = os.environ.get('OLLAMA_HOST', 'http://127.0.0.1:11434').rstrip('/')

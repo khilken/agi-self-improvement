@@ -113,3 +113,10 @@ class MetaImproverAgent(BaseMCPAgent):
                 "errors": len(errors)
             }
         }
+
+
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
+    from agents.base_runner import run_agent
+
+    run_agent(MetaImproverAgent())

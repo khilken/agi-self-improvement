@@ -5,11 +5,18 @@ set -euo pipefail
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LOG_DIR="$PROJECT_DIR/logs"
 PID_FILE="$PROJECT_DIR/.hermes_pids"
+PYTHON_BIN="${PYTHON_BIN:-$PROJECT_DIR/.venv/bin/python}"
+
+if [ ! -x "$PYTHON_BIN" ]; then
+    echo "Python runtime not found: $PYTHON_BIN"
+    echo "Run: PYTHON_BIN=python3.11 ./setup_hermes.sh"
+    exit 1
+fi
 
 # Point all agents at the LAN Ollama server (not localhost)
 export OLLAMA_HOST="${OLLAMA_HOST:-http://192.168.1.111:11434}"
 export HERMES_DEFAULT_MODEL="${HERMES_DEFAULT_MODEL:-qwen2.5:32b}"
-export PYTHONPATH="$PROJECT_DIR${PYTHONPATH:+:$PYTHONPATH}"
+export PYTHONPATH="$PROJECT_DIR"
 
 mkdir -p "$LOG_DIR"
 
@@ -30,6 +37,7 @@ touch "$PID_FILE"
 echo "🚀 Starting Full Hermes Multi-Agent Stack..."
 echo "Project: $PROJECT_DIR"
 echo "Ollama:  $OLLAMA_HOST"
+echo "Python:  $PYTHON_BIN"
 echo ""
 
 start_component() {
@@ -39,7 +47,7 @@ start_component() {
 
     echo "Starting $name..."
     # Use nohup + background without subshell so we capture the real python PID
-    nohup python "$script" > "$log_file" 2>&1 &
+    nohup "$PYTHON_BIN" "$script" > "$log_file" 2>&1 &
     local pid=$!
     echo "$name:$pid" >> "$PID_FILE"
     echo "  → PID: $pid"

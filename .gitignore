@@ -1,18 +1,30 @@
+# Python/runtime caches
 __pycache__/
-*.pyc
+*.py[cod]
 *.pyo
 .Python
+.pytest_cache/
+
+# Project virtualenvs
+.venv/
+venv/
+
+# Local runtime state
 logs/
-mcp/queues/
-memory/vector_db/
-.hermes_pids
-.env
-*.sqlite3
-.DS_Store
 logs/traces/
 logs/experiments/
 logs/history/
 logs/improvements/
 logs/approvals/
-.venv/
-venv/
+.hermes_pids
+memory/vector_db/
+mcp/registry.json
+mcp/queues/
+*.sqlite3
+
+# OS/editor noise
+.DS_Store
+
+# Secrets / local env
+.env
+*.env

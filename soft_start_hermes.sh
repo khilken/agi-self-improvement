@@ -5,10 +5,17 @@ set -euo pipefail
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LOG_DIR="$PROJECT_DIR/logs"
 PID_FILE="$PROJECT_DIR/.hermes_pids"
+PYTHON_BIN="${PYTHON_BIN:-$PROJECT_DIR/.venv/bin/python}"
+
+if [ ! -x "$PYTHON_BIN" ]; then
+  echo "Python runtime not found: $PYTHON_BIN"
+  echo "Run: PYTHON_BIN=python3.11 ./setup_hermes.sh"
+  exit 1
+fi
 
 export OLLAMA_HOST="${OLLAMA_HOST:-http://192.168.1.111:11434}"
 export HERMES_DEFAULT_MODEL="${HERMES_DEFAULT_MODEL:-qwen2.5:32b}"
-export PYTHONPATH="$PROJECT_DIR${PYTHONPATH:+:$PYTHONPATH}"
+export PYTHONPATH="$PROJECT_DIR"
 
 mkdir -p "$LOG_DIR"
 : > "$PID_FILE"
@@ -27,12 +34,13 @@ start_if_needed() {
     return
   fi
   echo "  → Starting $name"
-  python "$script" >> "$LOG_DIR/${name}.log" 2>&1 &
+  "$PYTHON_BIN" "$script" >> "$LOG_DIR/${name}.log" 2>&1 &
   echo "$name:$!" >> "$PID_FILE"
 }
 
 echo "Soft-starting Hermes stack..."
 echo "Ollama: $OLLAMA_HOST"
+echo "Python: $PYTHON_BIN"
 
 start_if_needed "Dashboard" "memory_dashboard/run_dashboard_server.py"
 start_if_needed "MemorySynthesizer" "agents/memory_synthesizer.py"

@@ -66,3 +66,5 @@ Hermes blocks gateway restart from inside a gateway-spawned session because the 
 
 - `hermes cron list` may keep showing old `last_run` drift errors until each job fires again. The underlying records are repaired.
 - `~/.hermes/cron/jobs.json` and OAuth files are operational state and should not be committed to this project repo.
+- Use `scripts/verify_cron_state.py` for future no-inference cron audits. It reads the live cron store and reports pinned-job drift, script timeout regressions, and remaining external setup warnings without running agent jobs or making model calls.
+- `scripts/youtube_digest.py` is the versioned cron script template. Deploy it to `~/.hermes/scripts/youtube_digest.py` when updating the live no-agent YouTube digest job; keep `credentials.json`, `token.json`, and output files local-only.

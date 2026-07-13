@@ -1,0 +1,3 @@
+[submodule "integrations/opencrabs"]
+	path = integrations/opencrabs
+	url = https://github.com/adolfousier/opencrabs.git

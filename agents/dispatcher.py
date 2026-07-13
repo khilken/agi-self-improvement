@@ -42,6 +42,16 @@ AGENT_REGISTRY: Dict[str, List[str]] = {
     "version_control_rollback": ["rollback", "version"],
     "resource_monitor": ["resource", "cost", "usage"],
     "external_integration": ["slack", "telegram", "notion", "email"],
+    "opencrabs": [
+        "opencrabs",
+        "rust_agent_runtime",
+        "a2a_gateway",
+        "external_agent_runtime",
+        "opencrabs_status",
+        "opencrabs_doctor",
+        "opencrabs_build",
+        "opencrabs_run",
+    ],
 }
 
 
@@ -73,6 +83,8 @@ class HermesDispatcher:
             return "comprehensive_debug_testing"
         if "news" in task_l:
             return "news_research"
+        if "opencrabs" in task_l or "a2a" in task_l or "rust_agent" in task_l:
+            return "opencrabs"
         return preferred or "researcher"
 
     def dispatch(

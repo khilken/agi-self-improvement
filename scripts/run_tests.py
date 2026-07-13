@@ -17,11 +17,19 @@ from typing import Iterable
 
 ROOT = Path(__file__).resolve().parents[1]
 SKIP_DIRS = {".git", "__pycache__", ".venv", "venv", "logs"}
+SKIP_PREFIXES = {(Path("integrations") / "opencrabs").parts}
+
+
+def should_skip(path: Path) -> bool:
+    rel_parts = path.relative_to(ROOT).parts
+    if any(part in SKIP_DIRS for part in rel_parts):
+        return True
+    return any(rel_parts[: len(prefix)] == prefix for prefix in SKIP_PREFIXES)
 
 
 def iter_python_files() -> Iterable[Path]:
     for path in sorted(ROOT.rglob("*.py")):
-        if any(part in SKIP_DIRS for part in path.relative_to(ROOT).parts):
+        if should_skip(path):
             continue
         yield path
 
@@ -43,8 +51,11 @@ def import_check() -> tuple[bool, list[str]]:
 import pathlib, sys
 root = pathlib.Path('.')
 fail=[]; ok=0
+skip_prefixes = {('integrations', 'opencrabs')}
 for p in sorted(root.rglob('*.py')):
     if any(part in {'.git','__pycache__','.venv','venv','logs'} for part in p.parts):
+        continue
+    if any(p.parts[:len(prefix)] == prefix for prefix in skip_prefixes):
         continue
     if p.name.startswith('_'):
         continue

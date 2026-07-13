@@ -52,6 +52,43 @@ AGENT_REGISTRY: Dict[str, List[str]] = {
         "opencrabs_build",
         "opencrabs_run",
     ],
+    "momo": [
+        "momo",
+        "ai_memory_system",
+        "external_memory_service",
+        "mcp_memory_server",
+        "momo_status",
+        "momo_doctor",
+        "momo_build",
+        "momo_health",
+        "momo_document",
+        "momo_documents",
+        "momo_search",
+        "momo_ingest",
+    ],
+    "awesome_llm_apps": [
+        "awesome_llm_apps",
+        "llm_app_templates",
+        "agent_template_catalog",
+        "awesome_llm_apps_status",
+        "awesome_llm_apps_doctor",
+        "awesome_llm_apps_list",
+        "awesome_llm_apps_show",
+        "awesome_llm_apps_setup",
+        "awesome_llm_apps_run",
+    ],
+    "prefect": [
+        "prefect",
+        "workflow_orchestration",
+        "flow_orchestration",
+        "prefect_status",
+        "prefect_doctor",
+        "prefect_setup",
+        "prefect_cli",
+        "prefect_smoke",
+        "prefect_server",
+        "prefect_wait_ready",
+    ],
 }
 
 
@@ -85,6 +122,12 @@ class HermesDispatcher:
             return "news_research"
         if "opencrabs" in task_l or "a2a" in task_l or "rust_agent" in task_l:
             return "opencrabs"
+        if "momo" in task_l or "memory_service" in task_l or "mcp_memory" in task_l:
+            return "momo"
+        if "awesome_llm" in task_l or "llm_app_template" in task_l or "agent_template" in task_l:
+            return "awesome_llm_apps"
+        if "prefect" in task_l or "workflow_orchestration" in task_l or "flow_orchestration" in task_l:
+            return "prefect"
         return preferred or "researcher"
 
     def dispatch(

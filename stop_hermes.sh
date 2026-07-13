@@ -25,6 +25,9 @@ else
     pkill -f "orchestrator_agent.py" || true
     pkill -f "hyper_meta_improver_agent.py" || true
     pkill -f "opencrabs_agent.py" || true
+    pkill -f "momo_agent.py" || true
+    pkill -f "awesome_llm_apps_agent.py" || true
+    pkill -f "prefect_agent.py" || true
 fi
 
 # Fallback cleanup for any leftover agent processes
@@ -37,5 +40,8 @@ pkill -f "meta_improver_agent.py" 2>/dev/null || true
 pkill -f "orchestrator_agent.py" 2>/dev/null || true
 pkill -f "hyper_meta_improver_agent.py" 2>/dev/null || true
 pkill -f "opencrabs_agent.py" 2>/dev/null || true
+pkill -f "momo_agent.py" 2>/dev/null || true
+pkill -f "awesome_llm_apps_agent.py" 2>/dev/null || true
+pkill -f "prefect_agent.py" 2>/dev/null || true
 
 echo "✅ Hermes stack stopped."

@@ -17,7 +17,12 @@ from typing import Iterable
 
 ROOT = Path(__file__).resolve().parents[1]
 SKIP_DIRS = {".git", "__pycache__", ".venv", "venv", "logs"}
-SKIP_PREFIXES = {(Path("integrations") / "opencrabs").parts}
+SKIP_PREFIXES = {
+    (Path("integrations") / "opencrabs").parts,
+    (Path("integrations") / "momo").parts,
+    (Path("integrations") / "awesome-llm-apps").parts,
+    (Path("integrations") / "prefect").parts,
+}
 
 
 def should_skip(path: Path) -> bool:
@@ -51,7 +56,7 @@ def import_check() -> tuple[bool, list[str]]:
 import pathlib, sys
 root = pathlib.Path('.')
 fail=[]; ok=0
-skip_prefixes = {('integrations', 'opencrabs')}
+skip_prefixes = {('integrations', 'opencrabs'), ('integrations', 'momo'), ('integrations', 'awesome-llm-apps'), ('integrations', 'prefect')}
 for p in sorted(root.rglob('*.py')):
     if any(part in {'.git','__pycache__','.venv','venv','logs'} for part in p.parts):
         continue
@@ -86,7 +91,16 @@ if fail:
 
 
 def pytest_check() -> tuple[bool, list[str]]:
-    commands = [[sys.executable, "-m", "pytest", "-q"], ["pytest", "-q"]]
+    ignore_args = [
+        "--ignore=integrations/opencrabs",
+        "--ignore=integrations/momo",
+        "--ignore=integrations/awesome-llm-apps",
+        "--ignore=integrations/prefect",
+    ]
+    commands = [
+        [sys.executable, "-m", "pytest", "-q", *ignore_args],
+        ["pytest", "-q", *ignore_args],
+    ]
     last_output: list[str] = []
     for command in commands:
         try:

@@ -51,6 +51,9 @@ start_if_needed "MetaImprover" "agents/meta_improver_agent.py"
 start_if_needed "Orchestrator" "agents/orchestrator_agent.py"
 start_if_needed "HyperMetaImprover" "agents/hyper_meta_improver_agent.py"
 start_if_needed "OpenCRABS" "agents/opencrabs_agent.py"
+start_if_needed "Momo" "agents/momo_agent.py"
+start_if_needed "AwesomeLLMApps" "agents/awesome_llm_apps_agent.py"
+start_if_needed "Prefect" "agents/prefect_agent.py"
 
 sleep 1
 alive=0; total=0

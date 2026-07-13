@@ -12,6 +12,9 @@ This directory contains the growing family of specialized agents in the Hermes s
 | Evaluator | `evaluator_agent.py` | Output evaluation & reflection |
 | MetaImprover | `meta_improver_agent.py` | Self-improvement analysis |
 | OpenCRABS | `opencrabs_agent.py` | Managed bridge to the external OpenCRABS Rust agent runtime |
+| Momo | `momo_agent.py` | Managed bridge to the external Momo Rust AI memory service |
+| AwesomeLLMApps | `awesome_llm_apps_agent.py` | Catalog/launcher for the external awesome-llm-apps template collection |
+| Prefect | `prefect_agent.py` | Managed bridge to external Prefect workflow orchestration runtime |
 
 ## Supporting Modules
 
@@ -31,9 +34,12 @@ d.dispatch("researcher", "research", {"query": "AGI self-improvement 2026"})
 d.dispatch("evaluator", "evaluate", {"output": {...}, "trace_id": "xxx"})
 d.dispatch("meta_improver", "analyze_traces", {})
 d.dispatch("opencrabs", "opencrabs_doctor", {})
+d.dispatch("momo", "momo_doctor", {})
+d.dispatch("awesome_llm_apps", "awesome_llm_apps_list", {"query": "rag", "limit": 10})
+d.dispatch("prefect", "prefect_smoke", {})
 ```
 
 All agents follow the MCP pattern and can be extended with real LLM/tool calls.
 
-OpenCRABS is integrated as a git submodule plus process boundary. See
+OpenCRABS, Momo, Awesome LLM Apps, and Prefect are integrated as git submodules plus process boundaries. See
 `integrations/README.md` for setup, build, and runtime details.

@@ -90,9 +90,9 @@ class PrefectAgent(BaseMCPAgent):
             logger.exception("Prefect task failed")
             result = {"status": "failed", "error": str(exc), "action": task_type}
 
-        self.mcp.send_message(
-            to=msg.from_agent,
-            message_type=MessageType.TASK_RESULT,
+        self.mcp.send(
+            to_agent=msg.from_agent,
+            msg_type=MessageType.TASK_RESULT,
             payload=result,
             correlation_id=msg.correlation_id,
         )

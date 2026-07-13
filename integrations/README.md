@@ -2,6 +2,21 @@
 
 Hermes integrates selected external projects as managed subsystems behind process, network, or CLI boundaries. This keeps Hermes' Python runtime stable while still making external capabilities available through MCP agents and manager scripts.
 
+## Unified external integration checks
+
+Use the aggregate manager after adding or updating external runtimes:
+
+```bash
+PYTHONPATH=. python scripts/external_integrations_manage.py status
+PYTHONPATH=. python scripts/external_integrations_manage.py doctor
+PYTHONPATH=. python scripts/external_integrations_manage.py summary
+```
+
+The aggregate manager verifies that every managed source submodule exists and is
+at its pinned commit, then aggregates each integration's own non-mutating
+`doctor` output. This is the quickest operator check for maximum integration
+health across OpenCRABS, Momo, Awesome LLM Apps, and Prefect.
+
 ## OpenCRABS
 
 Hermes integrates [adolfousier/opencrabs](https://github.com/adolfousier/opencrabs) as a managed external Rust agent runtime.

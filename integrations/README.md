@@ -15,7 +15,79 @@ PYTHONPATH=. python scripts/external_integrations_manage.py summary
 The aggregate manager verifies that every managed source submodule exists and is
 at its pinned commit, then aggregates each integration's own non-mutating
 `doctor` output. This is the quickest operator check for maximum integration
-health across OpenCRABS, Momo, Awesome LLM Apps, Prefect, and Project N.O.M.A.D.
+health across OpenCRABS, Momo, Awesome LLM Apps, Prefect, Project N.O.M.A.D., and Background Agents / Open-Inspect.
+
+## Background Agents / Open-Inspect
+
+Hermes integrates [ColeMurray/background-agents](https://github.com/ColeMurray/background-agents) as a managed external background coding-agent platform.
+
+Open-Inspect is a TypeScript/Python monorepo with Cloudflare control-plane workers, a Next.js web app, sandbox-provider infrastructure, and Slack/GitHub/Linear integrations. Hermes keeps it behind explicit Node/npm, Python/uv, Terraform/Wrangler, and HTTP boundaries:
+
+- Source is tracked as a git submodule at `integrations/background-agents`.
+- `scripts/background_agents_manage.py` manages status, diagnostics, optional dependency setup, builds, typechecks, tests, and local web development.
+- `agents/background_agents_agent.py` exposes Open-Inspect operations through Hermes MCP routing.
+- Local Hermes metadata defaults to `~/.hermes/background-agents`.
+- Hermes verification excludes the external Open-Inspect source tree from compile/import/pytest sweeps.
+
+Pinned upstream commit:
+
+```text
+122264349e461ae8f9f60e8d2c5573f9715b8972
+```
+
+Status and diagnostics:
+
+```bash
+git submodule update --init --recursive integrations/background-agents
+PYTHONPATH=. python scripts/background_agents_manage.py status
+PYTHONPATH=. python scripts/background_agents_manage.py doctor
+```
+
+Optional local development checks:
+
+```bash
+PYTHONPATH=. python scripts/background_agents_manage.py setup --timeout 900
+PYTHONPATH=. python scripts/background_agents_manage.py shared-build --timeout 300
+PYTHONPATH=. python scripts/background_agents_manage.py build --timeout 900
+PYTHONPATH=. python scripts/background_agents_manage.py typecheck --timeout 900
+PYTHONPATH=. python scripts/background_agents_manage.py test --timeout 900
+```
+
+Local web UI development, after creating and filling `packages/web/.env.local` from the upstream docs:
+
+```bash
+PYTHONPATH=. python scripts/background_agents_manage.py web-dev --timeout 3600
+```
+
+Default local web URL:
+
+```text
+http://127.0.0.1:3000
+```
+
+Capabilities exposed to Hermes:
+
+- `background_agents`
+- `open_inspect`
+- `background_coding_agents`
+- `cloud_coding_agents`
+- `coding_agent_sandboxes`
+- `background_agents_status`
+- `background_agents_doctor`
+- `background_agents_setup`
+- `background_agents_build`
+- `background_agents_typecheck`
+- `background_agents_test`
+- `background_agents_web_dev`
+- `background_agents_web_build`
+- `background_agents_shared_build`
+
+Safety notes:
+
+- Open-Inspect is explicitly single-tenant: deploy only behind trusted SSO/VPN and scoped GitHub App installations.
+- Full deployment requires cloud credentials and Terraform/Wrangler/Modal/Daytona/Vercel/OpenComputer configuration; Hermes does not auto-deploy infrastructure.
+- Do not commit `.env.local`, Terraform `tfvars`/state, Cloudflare tokens, GitHub App private keys, OAuth tokens, Slack/Linear secrets, or sandbox secrets.
+- Treat Open-Inspect as an external platform, not a Hermes Python dependency.
 
 ## Project N.O.M.A.D.
 

@@ -104,6 +104,22 @@ AGENT_REGISTRY: Dict[str, List[str]] = {
         "nomad_down",
         "nomad_wait_ready",
     ],
+    "background_agents": [
+        "background_agents",
+        "open_inspect",
+        "background_coding_agents",
+        "cloud_coding_agents",
+        "coding_agent_sandboxes",
+        "background_agents_status",
+        "background_agents_doctor",
+        "background_agents_setup",
+        "background_agents_build",
+        "background_agents_typecheck",
+        "background_agents_test",
+        "background_agents_web_dev",
+        "background_agents_web_build",
+        "background_agents_shared_build",
+    ],
 }
 
 
@@ -145,6 +161,8 @@ class HermesDispatcher:
             return "prefect"
         if "project_nomad" in task_l or "nomad" in task_l or "offline_knowledge" in task_l or "offline_ai" in task_l:
             return "project_nomad"
+        if "background_agents" in task_l or "open_inspect" in task_l or "background_coding" in task_l or "coding_agent_sandbox" in task_l:
+            return "background_agents"
         return preferred or "researcher"
 
     def dispatch(

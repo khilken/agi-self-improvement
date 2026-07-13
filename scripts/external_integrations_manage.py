@@ -12,7 +12,7 @@ import argparse
 import json
 from typing import Any, Callable
 
-from scripts import awesome_llm_apps_manage, momo_manage, opencrabs_manage, prefect_manage, project_nomad_manage
+from scripts import awesome_llm_apps_manage, background_agents_manage, momo_manage, opencrabs_manage, prefect_manage, project_nomad_manage
 
 INTEGRATIONS: dict[str, dict[str, Callable[[], dict[str, Any]]]] = {
     "opencrabs": {
@@ -34,6 +34,10 @@ INTEGRATIONS: dict[str, dict[str, Callable[[], dict[str, Any]]]] = {
     "project-nomad": {
         "status": project_nomad_manage.status,
         "doctor": project_nomad_manage.doctor,
+    },
+    "background-agents": {
+        "status": background_agents_manage.status,
+        "doctor": background_agents_manage.doctor,
     },
 }
 

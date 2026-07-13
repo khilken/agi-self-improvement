@@ -34,6 +34,7 @@ pkill -f "momo_agent.py" 2>/dev/null || true
 pkill -f "awesome_llm_apps_agent.py" 2>/dev/null || true
 pkill -f "prefect_agent.py" 2>/dev/null || true
 pkill -f "project_nomad_agent.py" 2>/dev/null || true
+pkill -f "background_agents_agent.py" 2>/dev/null || true
 sleep 2
 
 rm -f "$PID_FILE"
@@ -77,6 +78,7 @@ start_component "Momo" "agents/momo_agent.py"
 start_component "AwesomeLLMApps" "agents/awesome_llm_apps_agent.py"
 start_component "Prefect" "agents/prefect_agent.py"
 start_component "ProjectNomad" "agents/project_nomad_agent.py"
+start_component "BackgroundAgents" "agents/background_agents_agent.py"
 
 echo ""
 echo "✅ All agents started successfully!"

@@ -13,3 +13,6 @@
 [submodule "integrations/project-nomad"]
 	path = integrations/project-nomad
 	url = https://github.com/Crosstalk-Solutions/project-nomad.git
+[submodule "integrations/background-agents"]
+	path = integrations/background-agents
+	url = https://github.com/ColeMurray/background-agents.git

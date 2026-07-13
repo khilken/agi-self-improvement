@@ -89,6 +89,21 @@ AGENT_REGISTRY: Dict[str, List[str]] = {
         "prefect_server",
         "prefect_wait_ready",
     ],
+    "project_nomad": [
+        "project_nomad",
+        "offline_knowledge_server",
+        "offline_media_archives_data",
+        "offline_ai_server",
+        "nomad_status",
+        "nomad_doctor",
+        "nomad_render_compose",
+        "nomad_compose_config",
+        "nomad_setup",
+        "nomad_build",
+        "nomad_up",
+        "nomad_down",
+        "nomad_wait_ready",
+    ],
 }
 
 
@@ -128,6 +143,8 @@ class HermesDispatcher:
             return "awesome_llm_apps"
         if "prefect" in task_l or "workflow_orchestration" in task_l or "flow_orchestration" in task_l:
             return "prefect"
+        if "project_nomad" in task_l or "nomad" in task_l or "offline_knowledge" in task_l or "offline_ai" in task_l:
+            return "project_nomad"
         return preferred or "researcher"
 
     def dispatch(

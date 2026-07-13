@@ -10,3 +10,6 @@
 [submodule "integrations/prefect"]
 	path = integrations/prefect
 	url = https://github.com/PrefectHQ/prefect.git
+[submodule "integrations/project-nomad"]
+	path = integrations/project-nomad
+	url = https://github.com/Crosstalk-Solutions/project-nomad.git

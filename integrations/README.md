@@ -15,7 +15,77 @@ PYTHONPATH=. python scripts/external_integrations_manage.py summary
 The aggregate manager verifies that every managed source submodule exists and is
 at its pinned commit, then aggregates each integration's own non-mutating
 `doctor` output. This is the quickest operator check for maximum integration
-health across OpenCRABS, Momo, Awesome LLM Apps, and Prefect.
+health across OpenCRABS, Momo, Awesome LLM Apps, Prefect, and Project N.O.M.A.D.
+
+## Project N.O.M.A.D.
+
+Hermes integrates [Crosstalk-Solutions/project-nomad](https://github.com/Crosstalk-Solutions/project-nomad) as a managed external offline-first knowledge and education server.
+
+Project N.O.M.A.D. is a Docker/Node application, not a Python package. Hermes therefore keeps it behind explicit Docker, Node, and HTTP boundaries:
+
+- Source is tracked as a git submodule at `integrations/project-nomad`.
+- `scripts/project_nomad_manage.py` manages status, diagnostics, local compose rendering, Docker Compose validation, and explicit start/stop operations.
+- `agents/project_nomad_agent.py` exposes Project Nomad operations through Hermes MCP routing.
+- Local compose/runtime state defaults to `~/.hermes/project-nomad`.
+- Hermes verification excludes the external Project Nomad source tree from compile/import/pytest sweeps.
+
+Pinned upstream commit:
+
+```text
+6a4f02dd4626c64f38ac07e4740bc250ba13fea1
+```
+
+Setup/status:
+
+```bash
+git submodule update --init --recursive integrations/project-nomad
+PYTHONPATH=. python scripts/project_nomad_manage.py status
+PYTHONPATH=. python scripts/project_nomad_manage.py doctor
+```
+
+Render a Hermes-local Docker Compose file without running the upstream sudo installer:
+
+```bash
+PYTHONPATH=. python scripts/project_nomad_manage.py render-compose
+PYTHONPATH=. python scripts/project_nomad_manage.py compose-config
+```
+
+Start/stop are explicit because Project Nomad can pull and run multiple containers and exposes an unauthenticated local Command Center by design:
+
+```bash
+PYTHONPATH=. python scripts/project_nomad_manage.py up --timeout 600
+PYTHONPATH=. python scripts/project_nomad_manage.py wait-ready --timeout 120
+PYTHONPATH=. python scripts/project_nomad_manage.py down
+```
+
+Default local URL:
+
+```text
+http://127.0.0.1:8080
+```
+
+Capabilities exposed to Hermes:
+
+- `project_nomad`
+- `offline_knowledge_server`
+- `offline_media_archives_data`
+- `offline_ai_server`
+- `nomad_status`
+- `nomad_doctor`
+- `nomad_render_compose`
+- `nomad_compose_config`
+- `nomad_setup`
+- `nomad_build`
+- `nomad_up`
+- `nomad_down`
+- `nomad_wait_ready`
+
+Safety notes:
+
+- Hermes does not run Project Nomad's `install_nomad.sh` automatically because it requires sudo/root privileges and is designed for Debian-based hosts.
+- The generated compose file is placed under `~/.hermes/project-nomad` and rewrites `/opt/project-nomad/*` host paths into Hermes-local state paths.
+- Project Nomad intentionally has no built-in authentication; do not expose it directly to the internet.
+- Do not commit generated compose files, databases, downloaded media archives, models, ZIM files, Docker volumes, or local runtime state.
 
 ## OpenCRABS
 

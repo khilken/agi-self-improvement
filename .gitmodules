@@ -16,3 +16,6 @@
 [submodule "integrations/background-agents"]
 	path = integrations/background-agents
 	url = https://github.com/ColeMurray/background-agents.git
+[submodule "integrations/ragflow"]
+	path = integrations/ragflow
+	url = https://github.com/infiniflow/ragflow.git

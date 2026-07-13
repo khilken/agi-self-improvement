@@ -120,6 +120,22 @@ AGENT_REGISTRY: Dict[str, List[str]] = {
         "background_agents_web_build",
         "background_agents_shared_build",
     ],
+    "ragflow": [
+        "ragflow",
+        "rag_flow",
+        "retrieval_augmented_generation",
+        "rag_engine",
+        "document_understanding",
+        "ragflow_status",
+        "ragflow_doctor",
+        "ragflow_render_config",
+        "ragflow_compose_config",
+        "ragflow_up",
+        "ragflow_down",
+        "ragflow_wait_ready",
+        "ragflow_web_setup",
+        "ragflow_web_build",
+    ],
 }
 
 
@@ -163,6 +179,8 @@ class HermesDispatcher:
             return "project_nomad"
         if "background_agents" in task_l or "open_inspect" in task_l or "background_coding" in task_l or "coding_agent_sandbox" in task_l:
             return "background_agents"
+        if "ragflow" in task_l or "rag_flow" in task_l or "retrieval_augmented_generation" in task_l or "rag_engine" in task_l:
+            return "ragflow"
         return preferred or "researcher"
 
     def dispatch(

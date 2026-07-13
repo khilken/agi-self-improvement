@@ -15,7 +15,82 @@ PYTHONPATH=. python scripts/external_integrations_manage.py summary
 The aggregate manager verifies that every managed source submodule exists and is
 at its pinned commit, then aggregates each integration's own non-mutating
 `doctor` output. This is the quickest operator check for maximum integration
-health across OpenCRABS, Momo, Awesome LLM Apps, Prefect, Project N.O.M.A.D., and Background Agents / Open-Inspect.
+health across OpenCRABS, Momo, Awesome LLM Apps, Prefect, Project N.O.M.A.D., Background Agents / Open-Inspect, and RAGFlow.
+
+## RAGFlow
+
+Hermes integrates [infiniflow/ragflow](https://github.com/infiniflow/ragflow) as a managed external RAG and document-understanding platform.
+
+RAGFlow is a large Docker/Python/Go/Node application, not a Hermes Python dependency. Hermes keeps it behind explicit Docker Compose, HTTP, Python/uv, Go, and Node boundaries:
+
+- Source is tracked as a git submodule at `integrations/ragflow`.
+- `scripts/ragflow_manage.py` manages status, diagnostics, Hermes-local Docker config rendering, Docker Compose validation, explicit stack start/stop, readiness probes, and optional frontend setup/build.
+- `agents/ragflow_agent.py` exposes RAGFlow operations through Hermes MCP routing.
+- Local Docker/runtime files default to `~/.hermes/ragflow/docker`.
+- Hermes verification excludes the external RAGFlow source tree from compile/import/pytest sweeps.
+
+Pinned upstream commit:
+
+```text
+b0cac0ac9dc88dddfde183f62a7d940af07dc9cd
+```
+
+Status and diagnostics:
+
+```bash
+git submodule update --init --recursive integrations/ragflow
+PYTHONPATH=. python scripts/ragflow_manage.py status
+PYTHONPATH=. python scripts/ragflow_manage.py doctor
+```
+
+Render and validate a Hermes-local Docker Compose runtime without editing upstream files:
+
+```bash
+PYTHONPATH=. python scripts/ragflow_manage.py render-config
+PYTHONPATH=. python scripts/ragflow_manage.py compose-config --timeout 120
+```
+
+Start/stop are explicit because RAGFlow pulls/runs a heavy multi-container stack and defaults to a web/API service surface:
+
+```bash
+PYTHONPATH=. python scripts/ragflow_manage.py up --timeout 1200
+PYTHONPATH=. python scripts/ragflow_manage.py wait-ready --timeout 300
+PYTHONPATH=. python scripts/ragflow_manage.py down
+```
+
+Default local URLs:
+
+```text
+Web UI: http://127.0.0.1:8088
+API:    http://127.0.0.1:9380
+Admin:  http://127.0.0.1:9381
+MCP:    http://127.0.0.1:9382
+```
+
+Capabilities exposed to Hermes:
+
+- `ragflow`
+- `rag_flow`
+- `retrieval_augmented_generation`
+- `rag_engine`
+- `document_understanding`
+- `ragflow_status`
+- `ragflow_doctor`
+- `ragflow_render_config`
+- `ragflow_compose_config`
+- `ragflow_up`
+- `ragflow_down`
+- `ragflow_wait_ready`
+- `ragflow_web_setup`
+- `ragflow_web_build`
+
+Safety notes:
+
+- RAGFlow self-hosting requires Docker, substantial local resources, and upstream docs list CPU >= 4 cores, RAM >= 16 GB, and disk >= 50 GB.
+- Upstream README cautions official Docker images are x86/amd64; Apple Silicon may need locally built compatible images before `up`.
+- Hermes does not auto-start RAGFlow or run privileged setup commands.
+- Do not commit `.env`, service configs with API keys, logs, Docker volumes, parsed documents, model caches, databases, OAuth credentials, or object-storage secrets.
+- The optional sandbox executor mounts Docker socket/privileged capabilities upstream; review before enabling sandbox profiles.
 
 ## Background Agents / Open-Inspect
 

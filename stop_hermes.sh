@@ -30,6 +30,7 @@ else
     pkill -f "prefect_agent.py" || true
     pkill -f "project_nomad_agent.py" || true
     pkill -f "background_agents_agent.py" || true
+    pkill -f "ragflow_agent.py" || true
 fi
 
 # Fallback cleanup for any leftover agent processes
@@ -47,5 +48,6 @@ pkill -f "awesome_llm_apps_agent.py" 2>/dev/null || true
 pkill -f "prefect_agent.py" 2>/dev/null || true
 pkill -f "project_nomad_agent.py" 2>/dev/null || true
 pkill -f "background_agents_agent.py" 2>/dev/null || true
+pkill -f "ragflow_agent.py" 2>/dev/null || true
 
 echo "✅ Hermes stack stopped."

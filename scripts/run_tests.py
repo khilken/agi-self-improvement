@@ -24,6 +24,7 @@ SKIP_PREFIXES = {
     (Path("integrations") / "prefect").parts,
     (Path("integrations") / "project-nomad").parts,
     (Path("integrations") / "background-agents").parts,
+    (Path("integrations") / "ragflow").parts,
 }
 
 
@@ -58,7 +59,7 @@ def import_check() -> tuple[bool, list[str]]:
 import pathlib, sys
 root = pathlib.Path('.')
 fail=[]; ok=0
-skip_prefixes = {('integrations', 'opencrabs'), ('integrations', 'momo'), ('integrations', 'awesome-llm-apps'), ('integrations', 'prefect'), ('integrations', 'project-nomad'), ('integrations', 'background-agents')}
+skip_prefixes = {('integrations', 'opencrabs'), ('integrations', 'momo'), ('integrations', 'awesome-llm-apps'), ('integrations', 'prefect'), ('integrations', 'project-nomad'), ('integrations', 'background-agents'), ('integrations', 'ragflow')}
 for p in sorted(root.rglob('*.py')):
     if any(part in {'.git','__pycache__','.venv','venv','logs'} for part in p.parts):
         continue
@@ -100,6 +101,7 @@ def pytest_check() -> tuple[bool, list[str]]:
         "--ignore=integrations/prefect",
         "--ignore=integrations/project-nomad",
         "--ignore=integrations/background-agents",
+        "--ignore=integrations/ragflow",
     ]
     commands = [
         [sys.executable, "-m", "pytest", "-q", *ignore_args],

@@ -1,6 +1,5 @@
 """Basic unit tests for tracing systems"""
 import tempfile
-import os
 from tracing.task_trace import TaskTracer
 from tracing.proposal import ProposalStore, ImprovementProposal, ProposalType, RiskLevel
 

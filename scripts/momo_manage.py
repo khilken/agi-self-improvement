@@ -44,7 +44,7 @@ def base_url() -> str:
     return os.getenv("MOMO_BASE_URL", f"http://{DEFAULT_HOST}:{DEFAULT_PORT}").rstrip("/")
 
 
-def _run_capture(cmd: list[str], cwd: Path | None = None, timeout: int = 15, env: dict[str, str] | None = None) -> dict[str, Any]:
+def _run_capture(cmd: list[str], cwd: Path | None = None, timeout: int | None = 15, env: dict[str, str] | None = None) -> dict[str, Any]:
     try:
         completed = subprocess.run(
             cmd,
@@ -222,7 +222,7 @@ def build(release: bool = True, timeout: int = 900) -> dict[str, Any]:
     return result
 
 
-def run_momo(args: Iterable[str], timeout: int = DEFAULT_TIMEOUT) -> dict[str, Any]:
+def run_momo(args: Iterable[str], timeout: int | None = DEFAULT_TIMEOUT) -> dict[str, Any]:
     binary = find_momo_binary()
     if not binary:
         return {
@@ -237,8 +237,13 @@ def run_momo(args: Iterable[str], timeout: int = DEFAULT_TIMEOUT) -> dict[str, A
     return result
 
 
-def serve(timeout: int = 30, single_process: bool = True) -> dict[str, Any]:
-    """Run the Momo HTTP service in the foreground until killed by caller."""
+def serve(timeout: int | None = None, single_process: bool = True) -> dict[str, Any]:
+    """Run the Momo HTTP service in the foreground until killed by caller.
+
+    Use ``timeout=None`` for daemon operation. Hermes should supervise long-lived
+    services with its background-process tracker rather than an internal
+    subprocess timeout that eventually kills an otherwise healthy server.
+    """
     args = ["--mode", "api"]
     if single_process:
         args.append("--single-process")
@@ -319,7 +324,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     build_p.add_argument("--timeout", type=int, default=900)
 
     serve_p = sub.add_parser("serve", help="Run the Momo HTTP service in the foreground")
-    serve_p.add_argument("--timeout", type=int, default=30)
+    serve_p.add_argument("--timeout", type=int, default=0, help="Internal timeout in seconds; 0 disables timeout for daemon use")
     serve_p.add_argument("--supervisor", action="store_true", help="Use Momo supervisor mode instead of API-only single process")
 
     wait_p = sub.add_parser("wait-ready", help="Wait for the Momo HTTP service to become healthy")
@@ -365,7 +370,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "build":
         return emit(build(release=not args.debug, timeout=args.timeout))
     if args.command == "serve":
-        return emit(serve(timeout=args.timeout, single_process=not args.supervisor))
+        return emit(serve(timeout=args.timeout or None, single_process=not args.supervisor))
     if args.command == "wait-ready":
         return emit(wait_ready(timeout=args.timeout))
     if args.command == "ingest":

@@ -100,13 +100,14 @@ class FileTransport:
     """
 
     _instance = None
+    _initialized = False
 
-    def __new__(cls, base_path=None):
+    def __new__(cls, base_path: Optional[Path] = None):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
         return cls._instance
 
-    def __init__(self, base_path: Path = None):
+    def __init__(self, base_path: Optional[Path] = None):
         if hasattr(self, "_initialized") and self._initialized:
             return
         if base_path is None:
@@ -264,12 +265,12 @@ class MCPProtocol:
             tags=["delegation"]
         )
 
-    def report_result(self, to_agent: str, correlation_id: str, result: Any, success: bool = True):
+    def report_result(self, to_agent: str, correlation_id: Optional[str], result: Any, success: bool = True):
         return self.send(
             to_agent=to_agent,
             msg_type=MessageType.TASK_RESULT,
             payload={"result": result, "success": success},
-            correlation_id=correlation_id
+            correlation_id=correlation_id or str(uuid.uuid4())
         )
 
     def share_memory(self, to_agent: str, key: str, value: Any, namespace: str = "global"):

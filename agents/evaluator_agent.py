@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import logging
 import json
-from typing import List, Dict, Any, Tuple
+from typing import List, Dict, Tuple
 
 from mcp.protocol import BaseMCPAgent, MessageType, MCPMessage
 from tracing.task_trace import tracer

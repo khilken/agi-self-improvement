@@ -25,14 +25,22 @@ except ImportError:
         def run(self, *args, **kwargs):
             raise RuntimeError("Flask is not installed. Install dependencies with: pip install -r requirements.txt")
 
-    Flask = lambda name: _DummyFlask()  # type: ignore
-    render_template_string = lambda *args, **kwargs: "Flask is not installed"  # type: ignore
+    def Flask(name):  # type: ignore
+        return _DummyFlask()
+
+    def render_template_string(*args, **kwargs):  # type: ignore
+        return "Flask is not installed"
+
     request = None  # type: ignore
-    redirect = lambda target: target  # type: ignore
-    url_for = lambda name: name  # type: ignore
+
+    def redirect(target):  # type: ignore
+        return target
+
+    def url_for(name):  # type: ignore
+        return name
 
 from tracing.proposal import ProposalStore
-from tracing.approval import ApprovalGate, ApprovalStatus
+from tracing.approval import ApprovalGate
 
 app = Flask(__name__)
 

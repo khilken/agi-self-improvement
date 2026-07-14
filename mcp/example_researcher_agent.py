@@ -12,7 +12,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from mcp.protocol import BaseMCPAgent, MessageType
+from mcp.protocol import BaseMCPAgent, MCPMessage, MessageType
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("ExampleResearcherAgent")
@@ -56,7 +56,7 @@ class ResearcherAgent(BaseMCPAgent):
 
         self.mcp.report_result(
             to_agent=msg.from_agent,
-            correlation_id=msg.correlation_id,
+            correlation_id=msg.correlation_id or msg.message_id,
             result=result,
             success=True,
         )

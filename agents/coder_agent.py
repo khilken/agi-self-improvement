@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import List
+from typing import Any, List
 
 from mcp.protocol import BaseMCPAgent, MessageType, MCPMessage
 
@@ -19,7 +19,12 @@ try:
     TASK_QUEUE_AVAILABLE = True
 except ImportError:
     TASK_QUEUE_AVAILABLE = False
-    complete_task = fail_task = lambda *a, **k: None
+
+    def complete_task(task_id: str, result: dict[str, Any] | None = None) -> bool:
+        return False
+
+    def fail_task(task_id: str, error: str) -> bool:
+        return False
 
 logger = logging.getLogger("CoderAgent")
 PROJECT_ROOT = Path(__file__).resolve().parents[1]

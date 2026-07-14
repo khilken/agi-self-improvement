@@ -1,6 +1,5 @@
 """Regression tests for proposal application and auto-apply safety."""
 
-from pathlib import Path
 
 from tracing.apply import ProposalApplicator
 from tracing.auto_apply import AutoApplyEngine

@@ -40,7 +40,7 @@ class AutoDebugAgent(BaseMCPAgent):
 
     def analyze_logs(self, log_glob: str = "logs/*.log", max_lines_per_file: int = 400) -> dict:
         files = sorted(glob.glob(log_glob))
-        findings = []
+        findings: list[dict[str, object]] = []
         error_counter: Counter[str] = Counter()
 
         for file_name in files:

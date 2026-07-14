@@ -54,7 +54,7 @@ def ui_url() -> str:
 def _run_capture(
     cmd: list[str],
     cwd: Path | None = None,
-    timeout: int = DEFAULT_TIMEOUT,
+    timeout: int | None = DEFAULT_TIMEOUT,
     env: dict[str, str] | None = None,
 ) -> dict[str, Any]:
     try:
@@ -279,11 +279,12 @@ def smoke(timeout: int = DEFAULT_TIMEOUT) -> dict[str, Any]:
     return result
 
 
-def server(timeout: int = 3600) -> dict[str, Any]:
+def server(timeout: int | None = None) -> dict[str, Any]:
     binary = prefect_bin()
     if not binary.exists():
         return {"ok": False, "error": "Prefect CLI not found. Run setup first."}
-    # This is intended for Hermes background terminal management. The process is long-lived.
+    # This is intended for Hermes background terminal management. The process is
+    # long-lived, so the default must not include an internal kill-switch timeout.
     return _run_capture(
         [str(binary), "server", "start", "--host", DEFAULT_HOST, "--port", str(DEFAULT_PORT)],
         timeout=timeout,
@@ -326,7 +327,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     smoke_p.add_argument("--timeout", type=int, default=DEFAULT_TIMEOUT)
 
     server_p = sub.add_parser("server")
-    server_p.add_argument("--timeout", type=int, default=3600)
+    server_p.add_argument("--timeout", type=int, default=0, help="Internal timeout in seconds; 0 disables timeout for daemon use")
 
     wait_p = sub.add_parser("wait-ready")
     wait_p.add_argument("--timeout", type=int, default=60)
@@ -347,7 +348,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "smoke":
         return emit(smoke(timeout=args.timeout))
     if args.command == "server":
-        return emit(server(timeout=args.timeout))
+        return emit(server(timeout=args.timeout or None))
     if args.command == "wait-ready":
         return emit(wait_ready(timeout=args.timeout))
     raise AssertionError(args.command)

@@ -16,7 +16,7 @@ import json
 import time
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict
 
 try:
     from vector_memory import VectorMemory, get_semantic_clustering
@@ -51,13 +51,20 @@ def export_memory_health(output_path: str = "memory_dashboard/memory_health.json
     for meta in metadatas:
         if not meta:
             continue
-        t = meta.get("type", "unknown")
+        t = str(meta.get("type", "unknown"))
         type_counts[t] = type_counts.get(t, 0) + 1
 
-        proj = meta.get("project", "general")
+        proj = str(meta.get("project", "general"))
         project_counts[proj] = project_counts.get(proj, 0) + 1
 
-        for tag in meta.get("tags", []):
+        raw_tags = meta.get("tags", [])
+        if isinstance(raw_tags, str):
+            tags = [raw_tags]
+        elif isinstance(raw_tags, list):
+            tags = [str(tag) for tag in raw_tags]
+        else:
+            tags = []
+        for tag in tags:
             tag_counts[tag] = tag_counts.get(tag, 0) + 1
 
     # Recent syntheses (last 10)
@@ -75,6 +82,7 @@ def export_memory_health(output_path: str = "memory_dashboard/memory_health.json
                 break
 
     # Run quick clustering stats (without full LLM summarization for speed)
+    cluster_stats: Dict[str, Any]
     try:
         clusters = clusterer.cluster_memories(n_results=600, min_cluster_size=3)
         cluster_stats = {

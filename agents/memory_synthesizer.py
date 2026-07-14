@@ -23,8 +23,7 @@ It communicates exclusively via MCP and reads/writes to the shared VectorMemory.
 import logging
 import re
 import time
-import uuid
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, cast
 
 from mcp.protocol import BaseMCPAgent, MessageType, MCPMessage
 from vector_memory import VectorMemory
@@ -37,7 +36,18 @@ try:
     TASK_QUEUE_AVAILABLE = True
 except ImportError:
     TASK_QUEUE_AVAILABLE = False
-    list_pending_tasks = claim_task = complete_task = fail_task = lambda *a, **k: None
+
+    def list_pending_tasks() -> list[dict[str, Any]]:
+        return []
+
+    def claim_task(task_id: str) -> bool:
+        return False
+
+    def complete_task(task_id: str, result: dict[str, Any] | None = None) -> bool:
+        return False
+
+    def fail_task(task_id: str, error: str) -> bool:
+        return False
 
 try:
     from config import get_ollama_client, OLLAMA_DEFAULT_MODEL, configure_ollama_env
@@ -66,7 +76,7 @@ class MemorySynthesizerAgent(BaseMCPAgent):
             self.vm = VectorMemory()  # Shared persistent vector memory
         except Exception as e:
             logger.error(f"VectorMemory init failed: {e}")
-            self.vm = None
+            self.vm = cast(Any, None)
 
         # Register custom handler
         self.mcp.register_handler(MessageType.TASK_REQUEST, self.handle_task_request)
@@ -244,7 +254,7 @@ class MemorySynthesizerAgent(BaseMCPAgent):
                 updated_metas.append(meta)
 
         if updated_ids:
-            self.vm.collection.update(ids=updated_ids, metadatas=updated_metas)
+            self.vm.collection.update(ids=updated_ids, metadatas=cast(Any, updated_metas))
             updated = len(updated_ids)
 
         return {
@@ -414,7 +424,7 @@ Periodic Reflection:"""
 
     def run_loop(self, poll_interval: float = 3.0):
         """Override to also process the shared task queue."""
-        logger.info(f"Starting MemorySynthesizer with shared task queue support")
+        logger.info("Starting MemorySynthesizer with shared task queue support")
         try:
             while True:
                 # Process incoming MCP messages

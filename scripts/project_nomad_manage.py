@@ -13,7 +13,6 @@ import json
 import os
 import shutil
 import subprocess
-import sys
 import time
 import urllib.request
 from pathlib import Path
@@ -97,7 +96,6 @@ def _docker_compose_version() -> str | None:
 def status() -> dict[str, Any]:
     commit = _git(["rev-parse", "HEAD"]).get("stdout", "") if SOURCE_DIR.exists() else ""
     branch = _git(["branch", "--show-current"]).get("stdout", "") if SOURCE_DIR.exists() else ""
-    remote = _git(["remote", "get-url", "origin"]).get("stdout", "") if SOURCE_DIR.exists() else ""
     package_json = SOURCE_DIR / "package.json"
     admin_package_json = SOURCE_DIR / "admin" / "package.json"
     compose_template = SOURCE_DIR / "install" / "management_compose.yaml"

@@ -6,12 +6,10 @@ Automatically applies low-risk improvement proposals without human review.
 High and medium risk proposals still go through the ApprovalGate.
 """
 
-from pathlib import Path
-import json
 import logging
 from typing import List
 
-from tracing.proposal import ProposalStore, ProposalType, RiskLevel
+from tracing.proposal import ProposalStore, RiskLevel
 from tracing.approval import ApprovalGate
 from tracing.history import ImprovementHistory, HistoryEvent, HistoryEventType
 

@@ -7,7 +7,7 @@ Based on 2026 best practices for safe agentic systems.
 """
 
 from enum import Enum
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional, List, Dict, Any
 import json

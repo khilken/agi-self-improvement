@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from scripts import verify_cron_state
-from scripts.youtube_digest import get_youtube_service, is_noninteractive
+from scripts.youtube_digest import get_youtube_service, is_noninteractive, main as youtube_main, oauth_status
 
 
 def test_cron_audit_flags_unpinned_snapshot() -> None:
@@ -90,3 +90,18 @@ def test_youtube_digest_fails_fast_noninteractive_without_token(tmp_path: Path, 
 def test_youtube_noninteractive_detects_cron_env(monkeypatch) -> None:
     monkeypatch.setenv("HERMES_CRON_JOB_ID", "job-1")
     assert is_noninteractive() is True
+
+
+def test_youtube_oauth_status_reports_manual_action_without_browser(tmp_path: Path) -> None:
+    status = oauth_status(tmp_path)
+
+    assert status["ok"] is False
+    assert status["credentials_present"] is False
+    assert "credentials.json" in status["action_required"]
+
+
+def test_youtube_check_oauth_cli_is_noninteractive(tmp_path: Path, capsys) -> None:
+    assert youtube_main(["--script-dir", str(tmp_path), "--check-oauth"]) == 1
+    output = capsys.readouterr().out
+
+    assert "credentials_present" in output

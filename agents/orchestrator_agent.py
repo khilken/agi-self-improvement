@@ -7,7 +7,7 @@ Task → Target Agent → Evaluator → (optional) Meta-Improver
 """
 
 import logging
-from typing import List, Dict, Any
+from typing import List
 
 from mcp.protocol import BaseMCPAgent, MessageType, MCPMessage
 from agents.dispatcher import HermesDispatcher

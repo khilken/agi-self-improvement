@@ -6,18 +6,15 @@ Generates high-quality, structured improvement proposals following
 2026 best practices (Hyperagents / Darwin Gödel Machine patterns).
 """
 
-import json
 import logging
 import uuid
-from datetime import datetime
-from pathlib import Path
 from typing import List, Dict, Any
 from collections import defaultdict
 
 from mcp.protocol import BaseMCPAgent, MessageType, MCPMessage
 from tracing.task_trace import tracer
 from tracing.proposal import ImprovementProposal, ProposalType, RiskLevel, ProposalStore
-from tracing.approval import ApprovalGate, ApprovalStatus
+from tracing.approval import ApprovalGate
 
 logger = logging.getLogger("MetaImproverAgent")
 
@@ -61,7 +58,7 @@ class MetaImproverAgent(BaseMCPAgent):
         low_score = [t for t in traces if t.evaluation_score and t.evaluation_score < 0.6]
         errors = [t for t in traces if t.error]
 
-        patterns = defaultdict(int)
+        patterns: defaultdict[str, int] = defaultdict(int)
         for t in low_score:
             if t.evaluation_feedback:
                 patterns[t.evaluation_feedback] += 1

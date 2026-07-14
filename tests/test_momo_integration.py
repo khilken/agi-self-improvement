@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from pathlib import Path
 
 from agents.dispatcher import AGENT_REGISTRY, HermesDispatcher
 from agents.momo_agent import MomoAgent
@@ -87,6 +86,35 @@ def test_momo_service_env_uses_persistent_home(monkeypatch, tmp_path):
     assert env["DATABASE_URL"].startswith("file:")
     assert str(tmp_path / "momo-home") in env["DATABASE_URL"]
     assert env["MOMO_API_KEYS"]
+
+
+def test_momo_serve_defaults_to_no_internal_timeout(monkeypatch):
+    captured = {}
+
+    def fake_run_momo(args, timeout):
+        captured["args"] = list(args)
+        captured["timeout"] = timeout
+        return {"ok": True}
+
+    monkeypatch.setattr(momo_manage, "run_momo", fake_run_momo)
+
+    assert momo_manage.serve()["ok"] is True
+    assert captured["timeout"] is None
+    assert captured["args"] == ["--mode", "api", "--single-process"]
+
+
+def test_momo_serve_cli_zero_timeout_disables_internal_timeout(monkeypatch):
+    captured = {}
+
+    def fake_serve(timeout=None, single_process=True):
+        captured["timeout"] = timeout
+        captured["single_process"] = single_process
+        return {"ok": True}
+
+    monkeypatch.setattr(momo_manage, "serve", fake_serve)
+
+    assert momo_manage.main(["serve", "--timeout", "0"]) == 0
+    assert captured == {"timeout": None, "single_process": True}
 
 
 def test_dispatcher_knows_momo_capabilities():

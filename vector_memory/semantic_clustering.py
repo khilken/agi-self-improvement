@@ -25,12 +25,15 @@ Dependencies (recommended):
 from __future__ import annotations
 import logging
 import time
-from typing import Any, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, cast
 from dataclasses import dataclass, field
 
 import numpy as np
 
 logger = logging.getLogger("Hermes.SemanticClustering")
+
+if TYPE_CHECKING:
+    from vector_memory.vector_memory import VectorMemory
 
 try:
     import hdbscan
@@ -105,19 +108,20 @@ class SemanticClustering:
         logger.info(f"Starting semantic clustering on up to {n_results} memories...")
 
         # 1. Fetch data from ChromaDB
-        data = self.collection.get(
+        data = cast(Dict[str, Any], self.collection.get(
             limit=n_results,
             include=["documents", "metadatas", "embeddings"]
-        )
+        ))
 
-        if not data.get("embeddings") or len(data["embeddings"]) == 0:
+        raw_embeddings = data.get("embeddings") or []
+        if len(raw_embeddings) == 0:
             logger.warning("No embeddings found for clustering.")
             return []
 
-        embeddings = np.array(data["embeddings"])
+        embeddings = np.array(raw_embeddings)
         ids = data.get("ids", [])
         documents = data.get("documents", [])
-        metadatas = data.get("metadatas", [])
+        metadatas = [dict(meta or {}) for meta in (data.get("metadatas", []) or [])]
 
         logger.info(f"Fetched {len(embeddings)} embeddings for clustering.")
 

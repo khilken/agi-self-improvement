@@ -7,7 +7,7 @@ Allows users to rate outputs and feed feedback back into the system.
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Dict, Any, List, Optional
+from typing import List
 import json
 from pathlib import Path
 import uuid
@@ -51,7 +51,7 @@ class FeedbackStore:
         return fb
 
     def get_by_trace(self, trace_id: str) -> List[Feedback]:
-        results = []
+        results: List[Feedback] = []
         if not self.file.exists():
             return results
         with open(self.file, "r") as f:
@@ -63,7 +63,7 @@ class FeedbackStore:
         return results
 
     def get_all(self) -> List[Feedback]:
-        results = []
+        results: List[Feedback] = []
         if not self.file.exists():
             return results
         with open(self.file, "r") as f:

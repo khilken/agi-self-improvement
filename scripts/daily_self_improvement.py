@@ -133,7 +133,7 @@ def run_daily_self_improvement():
 
     # 8. Summary
     print("[8/8] Run complete.")
-    print(f"\nSummary:")
+    print("\nSummary:")
     print(f"  - Proposals generated: {result.get('proposals_generated', 0)}")
     print(f"  - Hyper meta proposals: {hyper_result.get('proposals_generated', 0)}")
     print(f"  - Auto-applied (low risk): {len(applied)}")

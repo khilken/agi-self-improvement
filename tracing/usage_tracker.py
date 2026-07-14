@@ -6,9 +6,9 @@ Tracks token usage and estimated costs across agents.
 Can trigger alerts when thresholds are exceeded.
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime
-from typing import Dict, List, Optional
+from typing import Dict, List
 import json
 from pathlib import Path
 

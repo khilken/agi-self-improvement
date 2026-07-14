@@ -1,6 +1,5 @@
 """Tests for real, conservative agent behavior."""
 
-from pathlib import Path
 
 from agents.auto_debug_agent import AutoDebugAgent
 from agents.coder_agent import CoderAgent

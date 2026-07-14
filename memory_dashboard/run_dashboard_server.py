@@ -42,7 +42,7 @@ if __name__ == "__main__":
     os.chdir(DIRECTORY)
     
     with socketserver.TCPServer(("", PORT), DashboardHTTPRequestHandler) as httpd:
-        print(f"\n🚀 Hermes Memory Health Dashboard Server running!")
+        print("\n🚀 Hermes Memory Health Dashboard Server running!")
         print(f"   Open in your browser: http://localhost:{PORT}/memory_health_dashboard.html\n")
         print("   Press Ctrl+C to stop the server.\n")
         try:

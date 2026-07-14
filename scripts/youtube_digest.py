@@ -10,6 +10,7 @@ runtime script directory.
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import sys
 from datetime import datetime, timedelta, timezone
@@ -106,6 +107,25 @@ def get_youtube_service(script_dir: Path):
         token_file.write_text(creds.to_json())
 
     return build("youtube", "v3", credentials=creds)
+
+
+def oauth_status(script_dir: Path) -> dict[str, Any]:
+    """Return non-secret OAuth readiness state without opening a browser."""
+    credentials_file = script_dir / "credentials.json"
+    token_file = script_dir / "token.json"
+    status: dict[str, Any] = {
+        "ok": credentials_file.exists() and token_file.exists(),
+        "credentials_path": str(credentials_file),
+        "credentials_present": credentials_file.exists(),
+        "token_path": str(token_file),
+        "token_present": token_file.exists(),
+        "action_required": None,
+    }
+    if not status["credentials_present"]:
+        status["action_required"] = "Place Google OAuth credentials.json next to scripts/youtube_digest.py or pass --script-dir."
+    elif not status["token_present"]:
+        status["action_required"] = "Run scripts/youtube_digest.py once from an interactive terminal to complete browser consent."
+    return status
 
 
 def get_subscribed_channels(youtube) -> list[tuple[str, str]]:
@@ -229,12 +249,17 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     )
     parser.add_argument("--max-videos-per-channel", type=int, default=DEFAULT_MAX_VIDEOS_PER_CHANNEL)
     parser.add_argument("--max-total-videos", type=int, default=DEFAULT_MAX_TOTAL_VIDEOS)
+    parser.add_argument("--check-oauth", action="store_true", help="Check OAuth file readiness without opening a browser")
     return parser.parse_args(argv)
 
 
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv or sys.argv[1:])
     script_dir = args.script_dir.expanduser().resolve()
+    if args.check_oauth:
+        status = oauth_status(script_dir)
+        print(json.dumps(status, indent=2, sort_keys=True))
+        return 0 if status["ok"] else 1
     print("Starting YouTube Subscription Digest...")
     print(f"Script dir: {script_dir}")
     try:

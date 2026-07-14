@@ -9,7 +9,7 @@ and emails it to khilken1@gmail.com.
 
 import sys
 from pathlib import Path
-from datetime import datetime, date
+from datetime import date
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -30,12 +30,11 @@ def load_env_file(path: Path):
         os.environ.setdefault(key.strip(), value.strip().strip('"').strip("'"))
 
 
-load_env_file(Path.home() / ".hermes" / ".env")
+from tracing.history import ImprovementHistory  # noqa: E402
+from tracing.proposal import ProposalStore  # noqa: E402
+from tracing.approval import ApprovalGate  # noqa: E402
 
-from tracing.history import ImprovementHistory
-from tracing.proposal import ProposalStore
-from tracing.approval import ApprovalGate
-from tracing.task_trace import tracer
+load_env_file(Path.home() / ".hermes" / ".env")
 
 # Email configuration (update these or use environment variables)
 SMTP_SERVER = os.getenv("SMTP_SERVER", "smtp.gmail.com")

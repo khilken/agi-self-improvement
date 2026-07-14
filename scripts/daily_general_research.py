@@ -10,8 +10,6 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from agents.web_search_agent import WebSearchAgent
-from agents.web_scraper_agent import WebScraperAgent
 from agents.dispatcher import HermesDispatcher
 import logging
 

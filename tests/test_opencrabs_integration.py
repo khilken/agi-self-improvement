@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import os
-from pathlib import Path
 
 from agents.dispatcher import AGENT_REGISTRY, HermesDispatcher
 from agents.opencrabs_agent import OpenCrabsAgent

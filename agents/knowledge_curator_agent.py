@@ -7,7 +7,7 @@ Handles ingestion, deduplication, and linking of knowledge across Hermes.
 
 import logging
 import hashlib
-from typing import List, Dict, Any
+from typing import List, Dict
 from mcp.protocol import BaseMCPAgent, MessageType, MCPMessage
 
 logger = logging.getLogger("KnowledgeCuratorAgent")

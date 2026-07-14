@@ -11,7 +11,6 @@ This is inspired by Meta's HyperAgents (2026) and the Darwin Gödel Machine.
 import logging
 import uuid
 from typing import List, Dict, Any
-from collections import defaultdict
 
 from mcp.protocol import BaseMCPAgent, MessageType, MCPMessage
 from tracing.task_trace import tracer

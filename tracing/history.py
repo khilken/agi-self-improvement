@@ -57,7 +57,7 @@ class ImprovementHistory:
 
     def get_history(self, proposal_id: Optional[str] = None) -> List[HistoryEvent]:
         """Retrieve history, optionally filtered by proposal."""
-        events = []
+        events: List[HistoryEvent] = []
         if not self.events_file.exists():
             return events
 

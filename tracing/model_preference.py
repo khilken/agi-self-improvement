@@ -6,7 +6,7 @@ Handles model selection and preference logic, including Fable 5 support.
 """
 
 from enum import Enum
-from typing import Optional, Dict, Any
+from typing import Dict, Any
 import os
 
 

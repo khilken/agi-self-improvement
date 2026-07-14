@@ -8,7 +8,6 @@ Specialized agent for web search, result synthesis, and source verification.
 from __future__ import annotations
 
 import logging
-import json
 from typing import List
 
 from mcp.protocol import BaseMCPAgent, MessageType, MCPMessage

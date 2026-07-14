@@ -45,6 +45,42 @@ def test_prefect_agent_smoke_requires_setup_if_uninitialized(monkeypatch, tmp_pa
     assert "setup" in result["result"]["error"].lower()
 
 
+def test_prefect_server_defaults_to_no_internal_timeout(monkeypatch, tmp_path):
+    fake_cli = tmp_path / "venv" / "bin" / "prefect"
+    fake_cli.parent.mkdir(parents=True)
+    fake_cli.write_text("#!/bin/sh\n")
+    captured = {}
+
+    def fake_prefect_bin():
+        return fake_cli
+
+    def fake_run_capture(cmd, timeout, env):
+        captured["cmd"] = list(cmd)
+        captured["timeout"] = timeout
+        captured["env"] = env
+        return {"ok": True}
+
+    monkeypatch.setattr(prefect_manage, "prefect_bin", fake_prefect_bin)
+    monkeypatch.setattr(prefect_manage, "_run_capture", fake_run_capture)
+
+    assert prefect_manage.server()["ok"] is True
+    assert captured["timeout"] is None
+    assert captured["cmd"][:3] == [str(fake_cli), "server", "start"]
+
+
+def test_prefect_server_cli_zero_timeout_disables_internal_timeout(monkeypatch):
+    captured = {}
+
+    def fake_server(timeout=None):
+        captured["timeout"] = timeout
+        return {"ok": True}
+
+    monkeypatch.setattr(prefect_manage, "server", fake_server)
+
+    assert prefect_manage.main(["server", "--timeout", "0"]) == 0
+    assert captured == {"timeout": None}
+
+
 def test_dispatcher_knows_prefect():
     assert "prefect" in AGENT_REGISTRY
     assert "workflow_orchestration" in AGENT_REGISTRY["prefect"]

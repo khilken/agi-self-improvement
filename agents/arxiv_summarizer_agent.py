@@ -8,7 +8,6 @@ Specialized agent for fetching, summarizing, and extracting insights from arXiv 
 from __future__ import annotations
 
 import logging
-import json
 from typing import List
 
 from mcp.protocol import BaseMCPAgent, MessageType, MCPMessage

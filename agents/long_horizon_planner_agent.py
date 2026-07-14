@@ -6,7 +6,7 @@ Breaks down long-term goals into daily/weekly tasks and tracks progress.
 """
 
 import logging
-from typing import List
+from typing import Any, List
 from mcp.protocol import BaseMCPAgent, MessageType, MCPMessage
 from agents.dispatcher import HermesDispatcher
 
@@ -34,7 +34,7 @@ class LongHorizonPlannerAgent(BaseMCPAgent):
 
         # Decompose goal and dispatch tasks to other agents
         d = HermesDispatcher()
-        tasks = [
+        tasks: list[dict[str, Any]] = [
             {"agent": "researcher", "task_type": "research", "context": {"query": f"Research for: {goal}"}},
             {"agent": "knowledge_curator", "task_type": "organize", "context": {"topic": goal}},
             {"agent": "safety_governance", "task_type": "review", "context": {"topic": goal}}

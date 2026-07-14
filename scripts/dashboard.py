@@ -11,7 +11,6 @@ Generates a basic HTML dashboard showing:
 """
 
 from pathlib import Path
-import json
 from datetime import datetime
 
 # Import our systems

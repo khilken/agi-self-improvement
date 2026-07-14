@@ -7,7 +7,7 @@ Allows agents to publish, discover, and version reusable skills.
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Dict, List, Optional
+from typing import List, Optional
 import json
 from pathlib import Path
 import uuid

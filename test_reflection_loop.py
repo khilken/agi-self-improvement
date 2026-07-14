@@ -7,7 +7,6 @@ Task → Dispatcher (with tracing) → Agent → Evaluator → Trace saved
 """
 
 from agents.dispatcher import HermesDispatcher
-import json
 from pathlib import Path
 
 def main():

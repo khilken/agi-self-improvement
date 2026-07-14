@@ -14,7 +14,6 @@ import json
 import os
 import shutil
 import subprocess
-import sys
 import urllib.request
 from pathlib import Path
 from typing import Any
@@ -109,7 +108,6 @@ def _web_probe(timeout: int = 3) -> dict[str, Any]:
 def status() -> dict[str, Any]:
     commit = _git(["rev-parse", "HEAD"]).get("stdout", "") if SOURCE_DIR.exists() else ""
     branch = _git(["branch", "--show-current"]).get("stdout", "") if SOURCE_DIR.exists() else ""
-    remote = _git(["remote", "get-url", "origin"]).get("stdout", "") if SOURCE_DIR.exists() else ""
     package = _read_package_json(SOURCE_DIR / "package.json") if SOURCE_DIR.exists() else {}
     missing_files = [rel for rel in REQUIRED_FILES if not (SOURCE_DIR / rel).exists()]
     health = _web_probe(timeout=2)

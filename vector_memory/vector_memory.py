@@ -24,7 +24,7 @@ import time
 import uuid
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, cast
 import logging
 
 logger = logging.getLogger("Hermes.VectorMemory")
@@ -149,6 +149,18 @@ class VectorMemory:
     # Core Operations
     # -------------------------------------------------------------------------
 
+    def _sanitize_metadata(self, metadata: Optional[Dict[str, Any]]) -> Dict[str, str | int | float | bool]:
+        """Convert arbitrary app metadata into Chroma-supported scalar values."""
+        sanitized: Dict[str, str | int | float | bool] = {}
+        for key, value in (metadata or {}).items():
+            if value is None:
+                continue
+            if isinstance(value, (str, int, float, bool)):
+                sanitized[key] = value
+            else:
+                sanitized[key] = json.dumps(value, sort_keys=True, default=str)
+        return sanitized
+
     def add(
         self,
         content: str,
@@ -162,7 +174,7 @@ class VectorMemory:
             return ""
 
         item_id = id or str(uuid.uuid4())
-        meta = metadata or {}
+        meta = self._sanitize_metadata(metadata)
         meta.setdefault("timestamp", time.time())
         meta.setdefault("source", "hermes")
 
@@ -172,7 +184,7 @@ class VectorMemory:
             ids=[item_id],
             documents=[content],
             metadatas=[meta],
-            embeddings=[embedding]
+            embeddings=cast(Any, [embedding])
         )
 
         logger.debug(f"Added memory item | id={item_id} | meta={meta}")
@@ -187,7 +199,7 @@ class VectorMemory:
 
         for item in items:
             content = item["content"]
-            meta = item.get("metadata", {})
+            meta = self._sanitize_metadata(item.get("metadata", {}))
             meta.setdefault("timestamp", time.time())
             meta.setdefault("source", "hermes")
 
@@ -200,8 +212,8 @@ class VectorMemory:
         self.collection.add(
             ids=ids,
             documents=documents,
-            metadatas=metadatas,
-            embeddings=embeddings
+            metadatas=cast(Any, metadatas),
+            embeddings=cast(Any, embeddings)
         )
         return ids
 
@@ -218,12 +230,12 @@ class VectorMemory:
         query_embedding = self._get_embedding(query_text)
 
         results = self.collection.query(
-            query_embeddings=[query_embedding],
+            query_embeddings=cast(Any, [query_embedding]),
             n_results=n_results,
             where=filter,
-            include=include
+            include=cast(Any, include)
         )
-        return results
+        return cast(Dict[str, Any], results)
 
     def get_relevant_context(
         self,
@@ -266,8 +278,8 @@ class VectorMemory:
     def count(self) -> int:
         return self.collection.count()
 
-    def get_all(self, limit: int = 100) -> Dict:
-        return self.collection.get(limit=limit)
+    def get_all(self, limit: int = 100) -> Dict[str, Any]:
+        return cast(Dict[str, Any], self.collection.get(limit=limit))
 
     # -------------------------------------------------------------------------
     # Hermes-Specific Helpers

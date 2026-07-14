@@ -76,7 +76,7 @@ fi
 export OLLAMA_HOST HERMES_DEFAULT_MODEL
 python - <<'PY'
 import os, sys, urllib.request, json
-host = os.environ.get('OLLAMA_HOST', 'http://127.0.0.1:11434').rstrip('/')
+host = os.environ.get('OLLAMA_HOST', 'http://192.168.1.111:11434').rstrip('/')
 try:
     with urllib.request.urlopen(host + '/api/tags', timeout=5) as resp:
         data = json.loads(resp.read().decode())

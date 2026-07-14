@@ -5,7 +5,6 @@ Cost Optimization Recommendations
 Suggests the most cost-effective model for a given task.
 """
 
-from typing import Dict
 
 MODEL_COSTS = {
     "claude-fable-5": 0.015,

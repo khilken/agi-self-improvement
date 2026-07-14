@@ -9,8 +9,7 @@ information synthesis, and knowledge acquisition.
 from __future__ import annotations
 
 import logging
-import json
-from typing import List
+from typing import Any, List
 
 from mcp.protocol import BaseMCPAgent, MessageType, MCPMessage
 from config import get_ollama_client, OLLAMA_DEFAULT_MODEL, configure_ollama_env
@@ -21,7 +20,15 @@ try:
     TASK_QUEUE_AVAILABLE = True
 except ImportError:
     TASK_QUEUE_AVAILABLE = False
-    claim_task = complete_task = fail_task = lambda *a, **k: None
+
+    def claim_task(task_id: str) -> bool:
+        return False
+
+    def complete_task(task_id: str, result: dict[str, Any] | None = None) -> bool:
+        return False
+
+    def fail_task(task_id: str, error: str) -> bool:
+        return False
 
 logger = logging.getLogger("ResearcherAgent")
 
@@ -81,7 +88,9 @@ class ResearcherAgent(BaseMCPAgent):
         )
 
         if TASK_QUEUE_AVAILABLE:
-            complete_task(msg.payload.get("task_id"))
+            task_id = msg.payload.get("task_id")
+            if task_id:
+                complete_task(str(task_id))
 
 
 if __name__ == "__main__":

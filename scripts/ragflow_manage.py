@@ -192,7 +192,6 @@ def _write_env_from_template(template: Path, dest: Path) -> None:
 def status() -> dict[str, Any]:
     commit = _git(["rev-parse", "HEAD"]).get("stdout", "") if SOURCE_DIR.exists() else ""
     branch = _git(["branch", "--show-current"]).get("stdout", "") if SOURCE_DIR.exists() else ""
-    remote = _git(["remote", "get-url", "origin"]).get("stdout", "") if SOURCE_DIR.exists() else ""
     missing_files = [rel for rel in REQUIRED_FILES if not (SOURCE_DIR / rel).exists()]
     web_health = _http_probe(WEB_URL, timeout=2)
     api_health = _http_probe(f"{API_URL}/v1/system/version", timeout=2)

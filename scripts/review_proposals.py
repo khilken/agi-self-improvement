@@ -11,8 +11,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from tracing.proposal import ProposalStore
-from tracing.approval import ApprovalGate, ApprovalStatus
-from tracing.history import ImprovementHistory, HistoryEventType
+from tracing.approval import ApprovalGate
+from tracing.history import ImprovementHistory
 
 
 def main():

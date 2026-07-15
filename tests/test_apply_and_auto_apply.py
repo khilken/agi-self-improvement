@@ -56,5 +56,7 @@ def test_auto_apply_verifies_and_records(tmp_path):
 
     applied = engine.process_low_risk_proposals()
     assert applied == ["low-risk-1"]
-    assert engine.approval_gate.get_status("low-risk-1").status.value == "approved"
+    approval = engine.approval_gate.get_status("low-risk-1")
+    assert approval is not None
+    assert approval.status.value == "approved"
     assert engine.history.get_history("low-risk-1")

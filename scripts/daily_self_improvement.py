@@ -69,11 +69,12 @@ def run_daily_self_improvement():
 
     # 3. Knowledge + Safety + Planner
     print("[3/8] Knowledge Curator / Safety / Planner...")
-    for agent_cls, ttype, ctx in [
+    agent_specs: list[tuple[type, str, dict]] = [
         (KnowledgeCuratorAgent, "ingest", {"action": "ingest", "data": {"content": f"Daily run notes {datetime.now().isoformat()}"}}),
         (SafetyGovernanceAgent, "review", {"proposal": result}),
         (LongHorizonPlannerAgent, "plan", {"goal": "Continue recursive self-improvement of Hermes"}),
-    ]:
+    ]
+    for agent_cls, ttype, ctx in agent_specs:
         r = _run_agent_task(agent_cls(), ttype, ctx)
         print(f"      {r}")
 

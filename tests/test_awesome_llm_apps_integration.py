@@ -31,7 +31,7 @@ def test_awesome_llm_apps_show_template_readme():
     assert result["ok"] is True
     assert result["template"]["path"] == "starter_ai_agents/ai_travel_agent"
     assert result["template"]["has_requirements"] is True
-    assert result["readme"]
+    assert (result["readme"] is not None) is result["template"]["has_readme"]
 
 
 def test_awesome_llm_apps_agent_status_and_list():

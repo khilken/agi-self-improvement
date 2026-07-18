@@ -24,7 +24,7 @@ else
 fi
 VENV_DIR="${VENV_DIR:-$PROJECT_DIR/.venv}"
 OLLAMA_HOST="${OLLAMA_HOST:-http://192.168.1.111:11434}"
-HERMES_DEFAULT_MODEL="${HERMES_DEFAULT_MODEL:-qwen2.5:32b}"
+HERMES_DEFAULT_MODEL="${HERMES_DEFAULT_MODEL:-qwen3.6:27b}"
 ORIGINAL_PYTHONPATH="${PYTHONPATH:-}"
 
 # Keep setup hermetic. Hermes desktop sessions can inject the global Hermes

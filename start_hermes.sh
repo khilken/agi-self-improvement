@@ -15,7 +15,7 @@ fi
 
 # Point all agents at the LAN Ollama server (not localhost)
 export OLLAMA_HOST="${OLLAMA_HOST:-http://192.168.1.111:11434}"
-export HERMES_DEFAULT_MODEL="${HERMES_DEFAULT_MODEL:-qwen2.5:32b}"
+export HERMES_DEFAULT_MODEL="${HERMES_DEFAULT_MODEL:-qwen3.6:27b}"
 export PYTHONPATH="$PROJECT_DIR"
 
 mkdir -p "$LOG_DIR"

@@ -15,7 +15,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent
 
 # Ollama — user preference: local server on LAN, not localhost
 OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://192.168.1.111:11434")
-OLLAMA_DEFAULT_MODEL = os.getenv("HERMES_DEFAULT_MODEL", "qwen2.5:32b")
+OLLAMA_DEFAULT_MODEL = os.getenv("HERMES_DEFAULT_MODEL", "qwen3.6:27b")
 OLLAMA_EMBED_MODEL = os.getenv("HERMES_EMBED_MODEL", "nomic-embed-text")
 
 # MCP queues — single absolute location shared by all processes
